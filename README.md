@@ -44,6 +44,8 @@ PolyForm Noncommercial 1.0.0 — nem kereskedelmi használat a licenc és a
 szerzői megjelölés megtartásával. Kereskedelmi használat kizárólag
 írásos engedéllyel: info@myra-project.hu
 
+A teljes licencszöveg: [LICENSE](LICENSE).
+
 ## Kapcsolat
 
 info@myra-project.hu
