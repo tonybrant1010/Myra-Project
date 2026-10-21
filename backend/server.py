@@ -7850,9 +7850,9 @@ async def set_user_nickname(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # HTML-jelölők eltávolítása regex nélkül: a reguláris kifejezés a CodeQL
-    # szerint ReDoS-minta, a karakterek szűrése lineáris idejű.
-    clean_nickname = body.nickname.strip().replace("<", "").replace(">", "")
+    # HTML-jelölők eltávolítása. A [^<>] osztály kizárja a határolókat,
+    # ezért a minta lineáris — nincs katasztrofális visszalépés (ReDoS).
+    clean_nickname = re.sub(r"<[^<>]*>", "", body.nickname.strip())
     if not clean_nickname:
         raise HTTPException(status_code=400, detail="A becenév nem lehet üres vagy érvvénytelen.")
     if len(clean_nickname) > 40:
