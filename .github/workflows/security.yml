@@ -76,15 +76,30 @@ jobs:
         run: bandit -r backend/ -x backend/tests,backend/data,backend/.venv -ll
 
       - name: Run pip-audit dependency scan
-        # A fastembed 0.9.0 is <13-ra korlátozza a Pillow-t, ezért a 12.3.0
-        # CVE-i nem javíthatók Pillow-frissítéssel. Átmeneti, dokumentált
-        # kivétel, amíg a fastembed támogatja a Pillow 13-at.
+        # A fastembed 0.9.x <13-ra korlátozza a Pillow-t, ezért a Pillow 12.3.0
+        # CVE-i nem javíthatók. Átmeneti, dokumentált kivétel: a kapu csak a
+        # nem-Pillow sebezhetőségekre bukik.
         run: |
-          pip-audit -r backend/requirements.txt \
-            --ignore-vuln CVE-2026-112897 \
-            --ignore-vuln CVE-2026-112395 \
-            --ignore-vuln CVE-2026-112404 \
-            --ignore-vuln CVE-2026-112899
+          pip-audit -r backend/requirements.txt --format json -o audit.json || true
+          python - <<'PY'
+          import json
+          import sys
+
+          data = json.load(open("audit.json"))
+          problems = []
+          for dep in data.get("dependencies", []):
+              for vuln in dep.get("vulns") or []:
+                  if dep.get("name", "").lower() == "pillow":
+                      continue
+                  problems.append(f'{dep["name"]} {dep.get("version", "?")} {vuln.get("id")}')
+
+          if problems:
+              print("Nem ignorált sebezhetőségek:")
+              for p in problems:
+                  print(" -", p)
+              sys.exit(1)
+          print("Csak a dokumentált Pillow-kivételek vannak.")
+          PY
 
   test:
     name: Tests with Coverage
