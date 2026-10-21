@@ -1,13 +1,13 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Myra mentes (2026-10-13).
 # Amit ment:
 #   - orankent: a Supabase public sema teljes dumpja + egy kisebb felhasznaloi dump
 #   - naponta: konfig-tarball (.env, compose, server.py, tudasanyag PDF-ek, uzemeltetesi
 #     konfigok: Caddy, fail2ban, rendszerd unitok) + a frontend build (/srv/myra)
 #   - minden futasnal: tukorzes a /mnt/win-re (ha csatolva) ES atmasolas a modellszerverre
-#     (myrallm) a WireGuard-tunnelen keresztul -> a backend host kiesese nem viszi el a mentest
+#     (<llm-host>) a WireGuard-tunnelen keresztul -> a backend host kiesese nem viszi el a mentest
 # Megorzes: NEM ido, hanem DARABSZAM alapjan (lentebb allithato).
-# Kell hozza: postgresql-client (>=17), rsync, es jelszo nelkuli SSH a myrallm fele.
+# Kell hozza: postgresql-client (>=17), rsync, es jelszo nelkuli SSH a <llm-host> fele.
 set -uo pipefail
 
 SRC=/home/<user>/myra
@@ -134,12 +134,12 @@ fi
 # --- Atmasolas a modellszerverre a WireGuard-tunnelen (off-host mentes) ---
 if ssh -i "$SSH_KEY" -o BatchMode=yes -o ConnectTimeout=8 <user>@<llm-wg-ip> true 2>/dev/null; then
   if rsync -a --delete -e "ssh -i $SSH_KEY -o BatchMode=yes" "$LOCAL/" "$REMOTE" 2>/dev/null; then
-    echo "off-host mentes: myrallm (<llm-wg-ip>) frissitve"
+    echo "off-host mentes: <llm-host> (<llm-wg-ip>) frissitve"
   else
-    echo "FIGYELEM: az rsync a myrallm fele nem sikerult"
+    echo "FIGYELEM: az rsync a <llm-host> fele nem sikerult"
   fi
 else
-  echo "FIGYELEM: nincs jelszo nelkuli SSH a myrallm fele, az off-host mentes kimaradt"
+  echo "FIGYELEM: nincs jelszo nelkuli SSH a <llm-host> fele, az off-host mentes kimaradt"
 fi
 
 echo "mentes kesz: $DUMP ($(du -h "$DUMP" | cut -f1)), helyben: $(du -sh "$LOCAL" | cut -f1), darabok: $(ls -1 "$LOCAL/orankent" | wc -l) orankenti + $(ls -1 "$LOCAL/napi" | wc -l) napi"
