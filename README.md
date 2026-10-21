@@ -38,10 +38,11 @@ token) **soha** ne commitolj — a `.gitignore` és a `.env.example` ezt hivatot
 - krízisjelzés három rétegben (előszűrő → modell → determinisztikus padló)
 - a helyi LLM csak a WireGuard-hálózaton érhető el
 
-## Dokumentáció
+## Licenc
 
-A részletes üzemeltetési, adatvédelmi és incidens-dokumentumok külön, nem publikus
-tárban vannak.
+PolyForm Noncommercial 1.0.0 — nem kereskedelmi használat a licenc és a
+szerzői megjelölés megtartásával. Kereskedelmi használat kizárólag
+írásos engedéllyel: info@myra-project.hu
 
 ## Kapcsolat
 
