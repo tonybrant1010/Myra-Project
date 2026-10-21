@@ -60,7 +60,7 @@ services:
       #   info@myra-project.hu     nyilvános kapcsolattartó (a levelek alján,
       #                            és ide megy a felhasználó válasza)
       # Ha a fiókban nincs SMTP token, a `bridge` profilú proton-bridge
-      # szolgáltatás a tartalék út — lásd lentebb és docs/email-proton-atallas.md
+      # szolgáltatás a tartalék út — lásd lentebb.
       - MYRA_SMTP_HOST=${MYRA_SMTP_HOST:-smtp.protonmail.ch}
       - MYRA_SMTP_PORT=${MYRA_SMTP_PORT:-587}
       - MYRA_SMTP_USER=${MYRA_SMTP_USER:-}
