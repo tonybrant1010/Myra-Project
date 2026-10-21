@@ -46,6 +46,13 @@ szerzői megjelölés megtartásával. Kereskedelmi használat kizárólag
 
 A teljes licencszöveg: [LICENSE](LICENSE).
 
+## Támogatás
+
+A projekt nem kereskedelmi célra ingyenesen használható. Ha hasznosnak
+találod, itt tudod támogatni a fejlesztést:
+
+[☕ Ko-fi](https://ko-fi.com/antalodor)
+
 ## Kapcsolat
 
 info@myra-project.hu
