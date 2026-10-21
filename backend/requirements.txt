@@ -31,7 +31,7 @@ fpdf2==2.8.7
 pillow<13,>=12.3.0
 
 # Local embeddings (ONNX Runtime, no PyTorch)
-fastembed==0.8.0
+fastembed==0.9.0
 
 # Helyi beszedfelismeres (diktalas; CPU-n, int8)
 faster-whisper==1.2.1
