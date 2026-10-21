@@ -1,0 +1,195 @@
+services:
+  # Szűkre szabott, csak "container stop"-ot engedő proxy a nyers docker.sock elé.
+  # A backend konténer így nem kap közvetlen (gyakorlatilag root-ekvivalens) hozzáférést
+  # a hoszt teljes Docker daemonjához - csak ezen a proxyn keresztül, csak stop hívást
+  # tud indítani. Lásd: https://github.com/Tecnativa/docker-socket-proxy
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: myra-docker-socket-proxy
+    restart: unless-stopped
+    # FONTOS: itt szándékosan NINCS "privileged: true". A proxy célja épp a jogosultság
+    # szűkítése; privileged módban viszont maga a proxy kapna root-ekvivalens hozzáférést
+    # a hoszthoz, ami az egész konstrukció értelmét lerontaná. A read-only socket-mount elég.
+    environment:
+      # Minden más API szekció (EXEC, IMAGES, NETWORKS, VOLUMES, BUILD, AUTH,
+      # SECRETS, SWARM stb.) alapértelmezetten (0) tiltva marad.
+      - CONTAINERS=1
+      - POST=1
+      - ALLOW_STOP=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # Szándékosan nincs "ports:" - csak a compose belső hálózatáról érhető el,
+    # a hoszton/kívülről nem publikált.
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: myra-backend
+    ports:
+      # Csak a gazdagépről érhető el. A külvilág felé a helyi Caddy proxyzik rá
+      # (ugyanezen a gépen, 127.0.0.1:8001), a Caddy-t pedig a router 80/443-as
+      # porttovábbítása éri el.
+      - "127.0.0.1:8001:8001"
+    restart: unless-stopped
+    depends_on:
+      - docker-socket-proxy
+    # FONTOS: a backend a gazdagépen KÍVÜL nem érhető el. Csak a loopbacken figyel,
+    # és kizárólag a helyi Caddy proxyzik rá (az fűzi be a X-Myra-Proxy-Secret
+    # fejlécet, tehát a titok a szerveren marad, a böngészőbe nem kerül). A healthcheck
+    # a konténeren BELÜLRŐL hívja a localhost:8001-et, azt ez nem érinti. Ha ide
+    # 0.0.0.0-s port kerül, azzal újranyitod a gépet az internet felé — ne tedd.
+    environment:
+      - JWT_SECRET=${JWT_SECRET:?set in .env}
+      - JWT_ALG=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=10080
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL must be set in .env (Supabase/PostgreSQL)}
+      - DATABASE_SSL=${DATABASE_SSL:-true}
+      - DATABASE_SSL_MODE=${DATABASE_SSL_MODE:-require}
+      - ADMIN_EMAIL_ALLOWLIST=${ADMIN_EMAIL_ALLOWLIST:-}
+      - TRUST_PROXY=${TRUST_PROXY:-true}
+      - MYRA_PROXY_SECRET=${MYRA_PROXY_SECRET:?set in .env}
+      # E-mail: 2026-10-14 óta nem Gmail, hanem Proton Mail, a saját domainről.
+      # Alapból a Proton közvetlen SMTP-beküldője megy (smtp.protonmail.ch:587,
+      # STARTTLS, valódi tanúsítvány-ellenőrzéssel).
+      # A MYRA_SMTP_PASSWORD az SMTP token, NEM a Proton-fiók jelszava — és a
+      # token EGYETLEN címhez szól, ezért a MYRA_SMTP_USER == MYRA_MAIL_FROM.
+      # Három cím, három szerep:
+      #   noreply@myra-project.hu  a rendszerlevelek feladója
+      #   admin@myra-project.hu    a belső riasztások helye
+      #   info@myra-project.hu     nyilvános kapcsolattartó (a levelek alján,
+      #                            és ide megy a felhasználó válasza)
+      # Ha a fiókban nincs SMTP token, a `bridge` profilú proton-bridge
+      # szolgáltatás a tartalék út — lásd lentebb és docs/email-proton-atallas.md
+      - MYRA_SMTP_HOST=${MYRA_SMTP_HOST:-smtp.protonmail.ch}
+      - MYRA_SMTP_PORT=${MYRA_SMTP_PORT:-587}
+      - MYRA_SMTP_USER=${MYRA_SMTP_USER:-}
+      - MYRA_SMTP_PASSWORD=${MYRA_SMTP_PASSWORD:-}
+      - MYRA_SMTP_SECURITY=${MYRA_SMTP_SECURITY:-starttls}
+      - MYRA_SMTP_TLS_VERIFY=${MYRA_SMTP_TLS_VERIFY:-true}
+      - MYRA_MAIL_FROM=${MYRA_MAIL_FROM:-noreply@myra-project.hu}
+      - MYRA_MAIL_FROM_NAME=${MYRA_MAIL_FROM_NAME:-Myra-project}
+      - MYRA_CONTACT_EMAIL=${MYRA_CONTACT_EMAIL:-info@myra-project.hu}
+      - MYRA_ALERT_EMAIL=${MYRA_ALERT_EMAIL:-admin@myra-project.hu}
+      - DOCKER_SOCKET_PROXY_URL=http://docker-socket-proxy:2375
+      # A Geminihez küldött csomag mérete. Ezek a kód szerint eddig is állíthatók
+      # voltak, de ide nem voltak felvéve, ezért SOHA nem jutottak el a konténerbe —
+      # ugyanaz a hiba, mint korábban a TTS_ENGINE-nél. Mostantól a .env-ből
+      # hangolhatók, újraépítés nélkül (elég egy `docker compose up -d backend`).
+      #
+      # RAG_CHAT_CHUNKS=0        -> egyáltalán nincs PDF-részlet a promptban
+      #                             (a 2026-08-12 előtti állapot), és elmarad a
+      #                             kérésenkénti 2-8 mp RAG-idő is
+      # RAG_VECTOR_MAX_DISTANCE  -> ennél lazább találat nem megy át (1.0 = nincs szűrés)
+      - CHAT_HISTORY_MAX_MESSAGES=${CHAT_HISTORY_MAX_MESSAGES:-120}
+      - CHAT_HISTORY_MAX_CHARS=${CHAT_HISTORY_MAX_CHARS:-45000}
+      - RAG_CHAT_CHUNKS=${RAG_CHAT_CHUNKS:-5}
+      - RAG_VECTOR_MAX_DISTANCE=${RAG_VECTOR_MAX_DISTANCE:-0.62}
+      - RAG_CANDIDATE_POOL=${RAG_CANDIDATE_POOL:-20}
+      - RAG_KEEPWARM_INTERVAL_S=${RAG_KEEPWARM_INTERVAL_S:-240}
+      # A beágyazó modell 128 tokennél (~500 karakter) elvág. Ennél nagyobb darab
+      # vége nem kerül a vektorba. Változtatás után ÚJRAINDEXELÉS kell!
+      - RAG_CHUNK_MAX_CHARS=${RAG_CHUNK_MAX_CHARS:-400}
+      - RAG_CHUNK_OVERLAP=${RAG_CHUNK_OVERLAP:-80}
+      # Felolvasás. Korábban ez a sor hiányzott, ezért a TTS_ENGINE sosem jutott
+      # el a konténerbe: alapértelmezésben "none" maradt, és a /tts/speak végpont
+      # élesben 503-at adott. Értéke "piper" vagy "none" — a Gemini-alapú
+      # felolvasás 2026 októberében megszűnt, a GEMINI_TTS_* változók törölve.
+      - TTS_ENGINE=${TTS_ENGINE:-piper}
+    volumes:
+      - ./backend/data:/app/data
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8001/api/config').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # FONTOS: a server.py lifespan-jében a RAG warmup a `yield` ELŐTT fut
+      # (server.py: `await _warmup_rag_runtime()`), ezért az uvicorn kb. 7 percig
+      # egyáltalán nem fogad kapcsolatot. start_period nélkül a Docker 3 sikertelen
+      # próba után — vagyis már ~90 másodperccel az indulás után — "unhealthy"-re
+      # állítja a konténert, teljesen egészséges build esetén is. A start_period
+      # alatt a sikertelen próbák nem számítanak bele a retries-be, az állapot
+      # "starting" marad, és az első sikeres próbánál azonnal "healthy" lesz.
+      #
+      # Az érték MÉRÉS alapján 900s, nem becslés: a 2026-08-16-i deploynál a
+      # warmup 596.6 másodpercig tartott (a korábbi mérés még 439s volt), tehát
+      # egy 600s-os kerettől mindössze 3 másodperc választotta el. A warmup ideje
+      # a VM memórianyomásától függ (969 MB RAM, jelentős swap), ezért ingadozik —
+      # a keretnek a lassú esetet kell elbírnia, nem az átlagot.
+      start_period: 900s
+
+  # 2026-10-13: a Cloudflare Tunnel (cloudflared) szolgáltatás megszűnt. A publikus
+  # bejövő forgalmat azóta a helyi Caddy szolgálja ki (Let's Encrypt tanúsítvánnyal),
+  # amit a router 80/443-as porttovábbítása ér el; a DNS zóna a Rackhost/dns24-nél van.
+  # A backend továbbra is csak loopbacken figyel, tehát a Caddy az egyetlen bejárat.
+
+  # ------------------------------------------------------- Proton Bridge (tartalék)
+  # 2026-10-14: a szokásos út a Proton közvetlen SMTP-beküldője (lásd a backend
+  # MYRA_SMTP_* változóit). Ez a szolgáltatás CSAK akkor kell, ha a Proton-fiókban
+  # nincs SMTP token (Settings -> All settings -> IMAP/SMTP -> SMTP tokens).
+  #
+  # Profil mögött van, ezért alapból NEM indul, és a normál üzemhez nem kell:
+  #     docker compose --profile bridge up -d
+  #
+  # Ilyenkor a .env-ben ezeket kell beállítani (a backend konténernek):
+  #     MYRA_SMTP_HOST=proton-bridge
+  #     MYRA_SMTP_PORT=25
+  #     MYRA_SMTP_TLS_VERIFY=false
+  # és ezeket a HOSZTON futó szkripteknek (myra-watch, myra-deploy):
+  #     MYRA_SMTP_HOST_LOCAL=127.0.0.1
+  #     MYRA_SMTP_PORT_LOCAL=1025
+  # (A közvetlen Proton SMTP-nél egyik sem kell: a szkriptek ilyenkor a
+  #  MYRA_SMTP_HOST / MYRA_SMTP_PORT értékét használják.)
+  #
+  # Egyszeri, interaktív bejelentkezés (a Proton-fiók + 2FA megadásával):
+  #     docker compose --profile bridge run --rm proton-bridge init
+  #     > login      # bejelentkezés
+  #     > info       # innen jön a MYRA_SMTP_USER és a MYRA_SMTP_PASSWORD
+  #     > exit
+  #
+  # FIGYELEM: ez az út élesben nincs kipróbálva ezen a repón; a kép a Proton
+  # hivatalos, pinnelt .deb csomagjából épül (nem harmadik féltől származó
+  # image-ből). A Bridge 150-400 MB RAM-ot kér, ezen a gépen ez szűkös.
+  proton-bridge:
+    profiles: ["bridge"]
+    build:
+      context: ./ops/proton-bridge
+      dockerfile: Dockerfile
+      args:
+        BRIDGE_VERSION: ${BRIDGE_VERSION:-3.27.1}
+    container_name: myra-proton-bridge
+    restart: unless-stopped
+    # A Bridge a kódjában 127.0.0.1-re köt a konténeren belül, ezt nem lehet
+    # átállítani, ezért a konténeren belüli socat forwardolja a 25-es portot.
+    #  - a compose hálózatáról: proton-bridge:25
+    #  - a hosztról (myra-watch, myra-deploy): 127.0.0.1:1025
+    # Kifelé, a loopbacken kívül szándékosan NINCS publikálva.
+    ports:
+      - "127.0.0.1:1025:25"
+    environment:
+      # Kis memóriájú gép: a szinkronizálás óvatosabb ütemét kéri.
+      - BRIDGE_SYNC_FORCE_MINIMUM_SPEC=1
+    volumes:
+      # A bejelentkezés, a GPG-kulcs és a pass-tár mind ide kerül: enélkül minden
+      # újraindítás után újra be kellene jelentkezni.
+      - proton-bridge-data:/root
+    # A Bridge a memóriát a levélszekrény méretével arányosan eszi. A korlát
+    # megvédi a backendet attól, hogy a Bridge OOM-killere magával vigye.
+    mem_limit: 384m
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 3 bash -c '</dev/tcp/127.0.0.1/1025' || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      # Az első szinkronizálás lassú lehet, addig nem szabad hibásnak jelölni.
+      start_period: 300s
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1460
+
+volumes:
+  proton-bridge-data:
