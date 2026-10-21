@@ -1,0 +1,123 @@
+{
+  "project_name": "Myra Project",
+  "design_system_version": "2026-06-27",
+  "source_of_truth": {
+    "theme_file": "frontend/src/theme.ts",
+    "primary_screens": [
+      "frontend/app/login.tsx",
+      "frontend/app/welcome.tsx",
+      "frontend/app/chat.tsx",
+      "frontend/app/quiz.tsx",
+      "frontend/app/quiz-result.tsx"
+    ],
+    "principle": "Design decisions must follow the existing Aurora Blue product UI unless the owner explicitly approves a redesign."
+  },
+  "theme_and_archetype": {
+    "theme": "Aurora Blue dark calm",
+    "archetype": "Minimal, therapeutic, focused, high-trust web app",
+    "vibe": "Quiet digital therapy room: deep navy, soft cyan light, glass layers, calm motion, low visual noise.",
+    "rationale": "Myra needs to feel private, steady, and technically reliable. The interface should support deep conversation without turning into a dashboard or marketing page."
+  },
+  "colors": {
+    "background": {
+      "name": "Primary Dark",
+      "hex": "#05111F",
+      "usage": "Page shell, safe areas, dark app frame."
+    },
+    "gradient_base": {
+      "name": "Aurora Background",
+      "stops": ["#04101D", "#08223B", "#123E66", "#EAF7FF"],
+      "usage": "Main content background via ContentBackground."
+    },
+    "primary": {
+      "name": "Deep Navy",
+      "hex": "#0A2340",
+      "usage": "Primary brand surfaces and strong actions."
+    },
+    "primary_soft": {
+      "name": "Soft Navy",
+      "hex": "#123A62",
+      "usage": "Button gradients and secondary dark surfaces."
+    },
+    "accent": {
+      "name": "Aurora Cyan",
+      "hex": "#57C7FF",
+      "usage": "Focus accents, dividers, glows, status light."
+    },
+    "accent_deep": {
+      "name": "Action Blue",
+      "hex": "#1D8ED8",
+      "usage": "Primary action gradient start and active call controls."
+    },
+    "accent_soft": {
+      "name": "Ice Blue",
+      "hex": "#DDF5FF",
+      "usage": "Text on dark badges, subtle highlights."
+    },
+    "danger": {
+      "name": "Calm Danger",
+      "hex": "#D95F72",
+      "usage": "Stop, destructive, and urgent states without aggressive red."
+    },
+    "text": {
+      "on_dark": {
+        "hex": "#F7FBFF",
+        "usage": "Primary text on dark surfaces."
+      },
+      "primary": {
+        "hex": "#10243A",
+        "usage": "Primary text on light surfaces."
+      },
+      "secondary": {
+        "hex": "#60758A",
+        "usage": "Secondary text and metadata."
+      }
+    }
+  },
+  "typography": {
+    "display": {
+      "family": "Manrope_700Bold",
+      "usage": "Main product names and strong screen titles."
+    },
+    "body": {
+      "family": "Manrope_400Regular",
+      "usage": "All readable app text, chat, forms, explanations."
+    },
+    "rule": "Keep type calm and legible. Do not use viewport-scaled text. Letter spacing must never be negative."
+  },
+  "layout_rules": {
+    "first_screen": "Show the working app surface first. Do not replace app screens with marketing hero pages.",
+    "cards": "Use cards for forms, repeated items, modals, and framed tools only. Avoid nested cards.",
+    "radius": "Default card radius should stay around 8-16px. Pill radius only for badges and small utility actions.",
+    "spacing": "Dense enough for operational use, calm enough for mental-health reading. Avoid cramped chat bubbles.",
+    "mobile": "All primary flows must fit narrow mobile widths without overlap, clipped controls, or hidden primary actions."
+  },
+  "component_rules": {
+    "content_background": "Use ContentBackground for app screens that need the Aurora environment. Do not introduce unrelated beige, purple, or one-hue gradient systems.",
+    "top_bar": "Keep TopBar compact, dark, and functional. Menu/back controls must remain obvious and touch-friendly.",
+    "login": "Login should feel premium, private, and simple: logo, short product description, form, support contact.",
+    "chat": "Conversation is the primary product surface. Preserve readable message widths, timestamps, avatar grounding, TXT export, and a stable bottom input bar.",
+    "live": "Live should stay centered and low-noise: avatar, status, one large microphone/stop control, clear memory notice, no transcript persistence unless explicitly redesigned.",
+    "quiz": "Quiz screens should keep section context, large tap targets, and clear progress. Decorative sheen layers must not block interaction."
+  },
+  "accessibility_and_ux": {
+    "contrast": "Text on glass surfaces must remain readable against the dark gradient.",
+    "touch_targets": "Primary controls should be at least 44x44px.",
+    "motion": "Motion should communicate state, not decorate. Live pulse is acceptable; avoid competing animations.",
+    "copy": "Keep interface text short, direct, and Hungarian-first.",
+    "warnings": "Medical/therapeutic disclaimers must remain visible where chat or live guidance appears."
+  },
+  "technical_rules": {
+    "web_shadows": "Use theme shadow tokens. On web they must resolve to boxShadow, not deprecated React Native shadow props.",
+    "pointer_events": "Decorative overlay layers must use style.pointerEvents = 'none', not the deprecated pointerEvents prop.",
+    "test_ids": "Important interactive elements should keep stable testID values in kebab-case.",
+    "assets": "Use local assets from frontend/assets/images where possible. Do not depend on remote image URLs for core UI identity."
+  },
+  "do_not_do": [
+    "Do not rewrite or soften the Myra prompt while doing design work.",
+    "Do not turn Myra into a generic SaaS dashboard.",
+    "Do not introduce a new color palette without explicit approval.",
+    "Do not add decorative visual noise that slows the app or distracts from conversation.",
+    "Do not hide admin or safety controls behind novelty UI."
+  ]
+}
