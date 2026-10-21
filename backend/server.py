@@ -1306,7 +1306,7 @@ def _resolve_pdf_source_dir(source_dir: Optional[str] = None) -> Path:
     env_root = os.environ.get("MYRA_KB_SOURCE_DIR")
     if env_root:
         allowed_roots.append(Path(env_root).expanduser().resolve())
-    if not any(path == root or root in path.parents for root in allowed_roots):
+    if not any(path.is_relative_to(root) for root in allowed_roots):
         raise HTTPException(status_code=400, detail="A PDF mappa nincs engedélyezve. Add meg MYRA_KB_SOURCE_DIR-ként.")
     if not path.exists() or not path.is_dir():
         raise HTTPException(status_code=400, detail=f"A PDF mappa nem található: {path}")
@@ -7260,8 +7260,9 @@ async def admin_diagnostics(admin: User = Depends(require_admin), db: AsyncSessi
     db_status = "ok"
     try:
         await db.execute(sql_text("SELECT 1"))
-    except Exception as e:
-        db_status = f"error: {str(e)}"
+    except Exception:
+        logger.exception("DB health check failed")
+        db_status = "error"
 
     api_key = await get_setting(db, "llm_api_key", "")
     gemini_key_ok = len(api_key.strip()) > 0
@@ -7540,7 +7541,10 @@ async def admin_list_kb_files(admin: User = Depends(require_admin)):
 async def admin_delete_kb_file(filename: str, request: Request, admin: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
     if "/" in filename or "\\" in filename or filename == ".." or not filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Érvénytelen fájlnév.")
-    pdf_path = ROOT_DIR / "data" / "kb_pdfs" / filename
+    kb_dir = (ROOT_DIR / "data" / "kb_pdfs").resolve()
+    pdf_path = (kb_dir / filename).resolve()
+    if not pdf_path.is_relative_to(kb_dir):
+        raise HTTPException(status_code=400, detail="Érvénytelen fájlnév.")
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="A fájl nem található.")
     try:
@@ -7598,8 +7602,9 @@ async def admin_stats(_: User = Depends(require_admin)):
         return {"ok": False, "hiba": "meg nincs osszesites (fut-e a myra-stats.timer?)"}
     try:
         tartalom = _json.loads(ut.read_text(encoding="utf-8"))
-    except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "hiba": f"a statisztika fajl nem ertelmezheto: {exc}"}
+    except Exception:  # noqa: BLE001
+        logger.exception("a statisztika fajl nem ertelmezheto")
+        return {"ok": False, "hiba": "a statisztika fajl nem ertelmezheto"}
     return {
         "ok": True,
         "fajl_ideje": datetime.fromtimestamp(ut.stat().st_mtime, timezone.utc).isoformat(timespec="seconds"),
@@ -7845,7 +7850,9 @@ async def set_user_nickname(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    clean_nickname = re.sub(r"<[^>]*>", "", body.nickname.strip())
+    # HTML-jelölők eltávolítása regex nélkül: a reguláris kifejezés a CodeQL
+    # szerint ReDoS-minta, a karakterek szűrése lineáris idejű.
+    clean_nickname = body.nickname.strip().replace("<", "").replace(">", "")
     if not clean_nickname:
         raise HTTPException(status_code=400, detail="A becenév nem lehet üres vagy érvvénytelen.")
     if len(clean_nickname) > 40:
