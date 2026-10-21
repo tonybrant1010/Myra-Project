@@ -25,6 +25,9 @@ email-validator==2.3.0
 # PDF
 pypdf==6.19.0
 fpdf2==2.8.7
+# A fpdf2/fastembed tranzitív függősége; a 12.3.0-t CVE-k miatt a
+# biztonsági kapu elutasítja, ezért explicit, javított verzió.
+pillow>=13.0.0
 
 # Local embeddings (ONNX Runtime, no PyTorch)
 fastembed==0.8.0
