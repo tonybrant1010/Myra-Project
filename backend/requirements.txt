@@ -28,7 +28,7 @@ fpdf2==2.8.7
 # A fpdf2/fastembed tranzitív függősége. A fastembed 0.9.0 is <13-ra
 # korlátozza a Pillow-t, ezért a 13.0.0 nem telepíthető mellé; a 12.3.0
 # CVE-it a CI dokumentált kivételként kezeli, amíg a fastembed engedi a 13-at.
-pillow<13,>=12.3.0
+pillow>=13.0.0,<14
 
 # Local embeddings (ONNX Runtime, no PyTorch)
 fastembed==0.8.0
