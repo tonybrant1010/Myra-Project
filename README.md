@@ -1,6 +1,6 @@
 # Myra Project
 
-**Web:** https://myra-project.hu
+https://myra-project.hu
 
 Önismereti platform: ESV-modell alapú állapotfelmérés, méréshez kötött chat, naplózott
 krízisjelzés.
