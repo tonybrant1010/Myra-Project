@@ -1,7 +1,13 @@
 # Myra Project
 
+![Myra Project](assets/readme/hero.png)
+
 Önismereti platform: ESV-modell alapú állapotfelmérés, méréshez kötött chat, naplózott
 krízisjelzés.
+
+## Képernyőképek
+
+![Irányítópult](assets/readme/screens.png)
 
 ## Architektúra
 
