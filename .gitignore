@@ -141,3 +141,6 @@ _pdf_out/
 # Telepítők és tudásbázis — nem a váz részei
 *.exe
 /backend/default_kb.pdf
+
+# Leallitas-jelzo (futasideju allapot, nem verziokovetett)
+/control/

@@ -98,6 +98,8 @@ services:
       - TTS_ENGINE=${TTS_ENGINE:-piper}
     volumes:
       - ./backend/data:/app/data
+      # Leallitas-jelzo: a Caddy ezt figyeli (ha letezik -> 404 mindenre).
+      - ./control:/control
 
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8001/api/config').status==200 else 1)"]

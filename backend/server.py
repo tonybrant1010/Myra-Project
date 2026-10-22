@@ -7494,9 +7494,14 @@ async def admin_restart(body: EmergencyAdminActionBody, request: Request, admin:
 
 async def _delayed_down():
     await asyncio.sleep(1.0)
-    logger.info("Emergency system shutdown (docker compose down) triggered via admin API.")
+    logger.info("Emergency full shutdown triggered via admin API.")
+    # A Caddy ezt a jelzofajlt figyeli: ha letezik, minden keresre 404-et ad.
+    try:
+        Path("/control/OFF").write_text("off\n", encoding="utf-8")
+    except Exception:
+        logger.exception("Nem sikerult a leallitas-jelzot letrehozni (/control/OFF)")
     async with httpx.AsyncClient(timeout=10.0) as proxy_client:
-        for container in ["myra-backend"]:
+        for container in ("myra-db", "myra-backend"):
             try:
                 resp = await proxy_client.post(f"{DOCKER_SOCKET_PROXY_URL}/containers/{container}/stop")
                 if resp.status_code not in (204, 304):
@@ -7516,7 +7521,7 @@ async def admin_down(body: EmergencyAdminActionBody, request: Request, admin: Us
         raise HTTPException(status_code=400, detail="Hibás jelszó (jelszo).")
     await _admin_audit(db, admin, request, "admin.system.down", "")
     _spawn_background_task(_delayed_down())
-    return {"ok": True, "message": "Backend and frontend shutdown scheduled in 1 second."}
+    return {"ok": True, "message": "Teljes leállítás 1 másodperc múlva: a Caddy 404-et ad, a DB és a backend leáll. Újraindítás SSH-ból: rm control/OFF && docker compose up -d."}
 
 
 @api.get("/admin/logs")
