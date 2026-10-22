@@ -229,7 +229,8 @@ class InMemoryLogHandler(logging.Handler):
 log_buffer = InMemoryLogHandler()
 log_buffer.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 log_buffer.addFilter(secret_redaction_filter)
-logging.getLogger("myra").addHandler(log_buffer)
+# Csak a root loggerre tesszük: a "myra" logger propagál a rootra, így
+# a sorok nem kerülnek kétszer a pufferbe.
 root_logger.addHandler(log_buffer)
 
 
