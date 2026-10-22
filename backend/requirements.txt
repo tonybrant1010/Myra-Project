@@ -23,7 +23,7 @@ pydantic==2.13.4
 email-validator==2.3.0
 
 # PDF
-pypdf==6.19.0
+pypdf==6.21.1
 fpdf2==2.8.7
 # A fpdf2/fastembed tranzitív függősége. A fastembed 0.9.0 is <13-ra
 # korlátozza a Pillow-t, ezért a 13.0.0 nem telepíthető mellé; a 12.3.0
