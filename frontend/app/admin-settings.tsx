@@ -339,17 +339,29 @@ export default function AdminSettingsScreen() {
     }
   };
 
-  const fetchLogs = async () => {
-    setLogsLoading(true);
+  const logsSeqRef = useRef(0);
+
+  const fetchLogs = async (since = 0) => {
     try {
-      const r = await authedFetch(token, "/api/admin/logs");
+      const r = await authedFetch(token, `/api/admin/logs?since=${since}`);
       if (r.ok) {
         const d = await r.json();
-        setLogs(d.logs || []);
+        const incoming: string[] = d.logs || [];
+        if (since === 0) setLogs(incoming);
+        else if (incoming.length) setLogs((prev) => [...prev, ...incoming].slice(-300));
+        if (typeof d.seq === "number") logsSeqRef.current = d.seq;
       }
     } catch {}
-    setLogsLoading(false);
   };
+
+  useEffect(() => {
+    if (!showLogs) return;
+    setLogsLoading(true);
+    fetchLogs(0).finally(() => setLogsLoading(false));
+    const id = setInterval(() => fetchLogs(logsSeqRef.current), 1500);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showLogs]);
 
   const forceLogoutAll = async () => {
     const currentPassword = requireEmergencyPassword();
@@ -1069,9 +1081,7 @@ export default function AdminSettingsScreen() {
                   <TouchableOpacity
                     style={styles.emergencyRowHeader}
                     onPress={() => {
-                      const next = !showLogs;
-                      setShowLogs(next);
-                      if (next) fetchLogs();
+                      setShowLogs(!showLogs);
                     }}
                     testID="sos-logs-header"
                   >
