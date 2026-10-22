@@ -226,12 +226,17 @@ class InMemoryLogHandler(logging.Handler):
         except Exception:
             self.handleError(record)
 
-log_buffer = InMemoryLogHandler()
+log_buffer = InMemoryLogHandler(capacity=500)
 log_buffer.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 log_buffer.addFilter(secret_redaction_filter)
 # Csak a root loggerre tesszük: a "myra" logger propagál a rootra, így
 # a sorok nem kerülnek kétszer a pufferbe.
 root_logger.addHandler(log_buffer)
+
+# Az uvicorn saját loggereit is átereszjuk a root-ra, különben az
+# access-sorok (GET /api/... 200) nem jelennek meg az élő logban.
+for _uv_name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
+    logging.getLogger(_uv_name).propagate = True
 
 
 def _secret_preview(secret: str) -> str:
