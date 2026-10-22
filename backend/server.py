@@ -214,11 +214,13 @@ class InMemoryLogHandler(logging.Handler):
     def __init__(self, capacity=100):
         super().__init__()
         self.capacity = capacity
-        self.buffer = []
+        self.buffer = []  # [(seq, line)]
+        self.seq = 0
 
     def emit(self, record):
         try:
-            self.buffer.append(_sanitize_log_line(self.format(record)))
+            self.seq += 1
+            self.buffer.append((self.seq, _sanitize_log_line(self.format(record))))
             if len(self.buffer) > self.capacity:
                 self.buffer.pop(0)
         except Exception:
@@ -7525,8 +7527,10 @@ async def admin_down(body: EmergencyAdminActionBody, request: Request, admin: Us
 
 
 @api.get("/admin/logs")
-async def admin_get_logs(admin: User = Depends(require_admin)):
-    return {"logs": [_sanitize_log_line(line) for line in log_buffer.buffer]}
+async def admin_get_logs(since: int = 0, admin: User = Depends(require_admin)):
+    items = [line for seq, line in log_buffer.buffer if seq > since]
+    last = log_buffer.buffer[-1][0] if log_buffer.buffer else since
+    return {"seq": last, "logs": items}
 
 @api.get("/admin/kb/files")
 async def admin_list_kb_files(admin: User = Depends(require_admin)):
