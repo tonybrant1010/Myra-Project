@@ -5,7 +5,7 @@
 Önismereti platform: ESV-modell alapú állapotfelmérés, méréshez kötött chat, naplózott
 krízisjelzés.
 
-![Myra Project](assets/readme/hero.png)
+![Myra Project](assets/readme/login.png)
 
 ![Irányítópult](assets/readme/screens.png)
 
