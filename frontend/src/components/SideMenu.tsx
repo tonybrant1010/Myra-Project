@@ -34,9 +34,9 @@ export default function SideMenu({ visible, onClose, forumUnread }: Props) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const [adminExpanded, setAdminExpanded] = useState(false);
-  // A megjelenítési mód. Kezdőértéknek szándékosan "day" kell, és csak utána
-  // olvassuk be a tényleges értéket: szerveroldali renderelésnél nincs
-  // localStorage, és az eltérő kezdőérték hidratálási hibát okozna.
+
+
+
   const [themeMode, setThemeModeState] = useState<ThemeMode>("day");
 
   useEffect(() => {
@@ -132,7 +132,7 @@ export default function SideMenu({ visible, onClose, forumUnread }: Props) {
                   <MenuItem label="Fórum" icon="chatbubbles-outline" onPress={() => { onClose(); router.push("/forum" as any); }} testID="menu-forum" badge={forumUnread} />
                   <MenuItem label="Új mérés" icon="analytics-outline" onPress={() => setConfirmRetake(true)} testID="menu-retake" disabled={busy} />
                   <MenuItem label="Beállítások" icon="person-circle-outline" onPress={() => { onClose(); router.push("/settings" as any); }} testID="menu-settings" />
-                  {/* A menü szándékosan nyitva marad: így rögtön látszik a váltás. */}
+                  {}
                   <MenuItem
                     label={themeMode === "night" ? "Nappali mód" : "Éjszakai mód"}
                     icon={themeMode === "night" ? "sunny-outline" : "moon-outline"}

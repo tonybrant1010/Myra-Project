@@ -63,7 +63,7 @@ export default function RegisterScreen() {
       if (!r.ok) {
         setError(r.error || "Nem sikerült regisztrálni.");
       } else if (r.emailVerificationRequired && r.challengeId) {
-        // A backend kódot küldött: külön képernyőn kell megerősíteni.
+
         router.replace({
           pathname: "/verify-email",
           params: { challenge: r.challengeId, email: email.trim() },

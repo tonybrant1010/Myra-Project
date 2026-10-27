@@ -70,7 +70,7 @@ def postafiok(monkeypatch):
     monkeypatch.setattr(server, "MYRA_MAIL_FROM_NAME", "Myra-project")
     monkeypatch.setattr(server, "MYRA_CONTACT_EMAIL", "info@myra-project.hu")
     monkeypatch.setattr(server, "MYRA_ALERT_EMAIL", "admin@myra-project.hu")
-    # A krízisriasztás címe IMPORT időben rögzül a modulban, ezért külön kell.
+
     monkeypatch.setattr(server, "CRISIS_ALERT_EMAIL", "admin@myra-project.hu")
     return _FakeSMTP
 
@@ -139,7 +139,7 @@ def test_a_felado_fejlec_az_email_headerrel_keszul():
     import email.header
 
     assert server._MailHeader is email.header.Header
-    # A modul valódi névkörnyezetében a `Header` a FastAPI-é:
+
     from fastapi import Header as FastapiHeader
 
     assert server.Header is FastapiHeader

@@ -18,13 +18,7 @@ import { shadow, theme } from "@/src/theme";
 import { T } from "@/src/components/Typography";
 import ContentBackground from "@/src/components/ContentBackground";
 
-/**
- * Regisztráció utáni e-mail megerősítés.
- *
- * Külön útvonal, hogy az állapot ne vesszen el: a regisztrációs oldal ide irányít,
- * a challenge és az email a query paraméterben jön. Újratöltésnél is működik, és
- * a kód a meglévő MFA-végpontra megy (/api/auth/mfa/verify).
- */
+
 export default function VerifyEmailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ challenge?: string; email?: string }>();

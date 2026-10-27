@@ -191,7 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const data = await r.json();
 
-    // Ha a backend megerősítést kér, NEM lépünk be azonnal: a kódképernyő jön.
+
     if (data?.email_verification_required) {
       return {
         ok: true,
@@ -242,7 +242,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       const u = await fetchMe(token);
       if (u === "maintenance") {
-        // Karbantartás alatt nem léptetjük ki: a token megmarad, a kapu tájékoztató oldalt mutat.
+
         if (mounted) setState({ loading: false, user: null, token });
         return;
       }

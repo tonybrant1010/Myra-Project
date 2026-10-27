@@ -137,11 +137,11 @@ def _env_beolvas(utvonal):
 
 
 ENV = _env_beolvas(ENV_FAJL)
-# 2026-10-14: a riasztasok a Proton Mailen mennek ki.
-#  - Kozvetlen Proton SMTP: a MYRA_SMTP_HOST / MYRA_SMTP_PORT erteket hasznaljuk.
-#  - Proton Mail Bridge: a Bridge a konténeren belul 127.0.0.1-re kot, ezert a
-#    hoszton a loopbackre publikalt portot kell hasznalni (MYRA_SMTP_HOST_LOCAL /
-#    MYRA_SMTP_PORT_LOCAL). A figyelo ugyanis a HOSZTON fut, nem a compose haloban.
+
+
+
+
+
 SMTP_HOST = ENV.get("MYRA_SMTP_HOST_LOCAL") or ENV.get("MYRA_SMTP_HOST") or "smtp.protonmail.ch"
 try:
     SMTP_PORT = int(ENV.get("MYRA_SMTP_PORT_LOCAL") or ENV.get("MYRA_SMTP_PORT") or 587)
@@ -150,10 +150,10 @@ except ValueError:
 SMTP_USER = ENV.get("MYRA_SMTP_USER", "")
 SMTP_PASSWORD = ENV.get("MYRA_SMTP_PASSWORD", "")
 MAIL_FROM = ENV.get("MYRA_MAIL_FROM") or "noreply@myra-project.hu"
-# A riasztas a rendszer feladójától megy, de a rendszer lényege, hogy emberhez
-# érkezzen: a riasztási cím, ennek híján a nyilvános kapcsolattartó.
+
+
 CIMZETT = ENV.get("MYRA_ALERT_EMAIL") or ENV.get("MYRA_CONTACT_EMAIL") or "info@myra-project.hu"
-# A Bridge onalairt tanusitvanya miatt a hoszti szkripteknel is kikapcsolhato.
+
 SMTP_TLS_VERIFY = (ENV.get("MYRA_SMTP_TLS_VERIFY") or "true").strip().lower() in {"1", "true", "yes", "on"}
 
 

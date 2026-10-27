@@ -1,16 +1,5 @@
 ﻿#!/usr/bin/env node
-/**
- * Helyi frontend-telepites a sajat szerverre (a Vercel kivaltasa).
- *
- * A friss dist/ mappat becsomagolja, feltolti a backend hostra, es ott
- * kicsomagolja a /srv/myra-ba, amit a Caddy szolgal ki.
- *
- * Elofeltetelek (egyszeri beallitas):
- *   1) jelszo nelkuli SSH a szerverre (ssh-kulcs),
- *   2) a /srv/myra a myra-admin tulajdona legyen (sudo chown -R myra-admin:myra-admin /srv/myra).
- *
- * Hasznalat: npm run deploy
- */
+
 const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");

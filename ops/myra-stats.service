@@ -1,4 +1,4 @@
-﻿[Unit]
+[Unit]
 Description=Myra forgalmi statisztika osszesito
 After=network-online.target
 
@@ -6,4 +6,5 @@ After=network-online.target
 Type=oneshot
 User=myra-admin
 Nice=10
-ExecStart=/home/<user>/myra/ops/myra-stats.py
+EnvironmentFile=/etc/myra/ops.env
+ExecStart=${MYRA_DIR}/ops/myra-stats.py

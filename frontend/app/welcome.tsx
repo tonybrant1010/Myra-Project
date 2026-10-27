@@ -189,7 +189,7 @@ function GoalsCard({ token }: { token: string | null }) {
         setGoals(data.goals || []);
       }
     } catch {
-      // opcionális kártya — hiba esetén egyszerűen nem jelenik meg
+
     } finally {
       setLoaded(true);
     }
@@ -307,7 +307,7 @@ export default function WelcomeScreen() {
       link.remove();
       URL.revokeObjectURL(url);
     } catch {
-      // csendes hiba — a letöltés újrapróbálható
+
     } finally {
       setReportBusy(false);
     }

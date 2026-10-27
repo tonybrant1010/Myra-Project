@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timezone
 from email.mime.text import MIMEText
 
-MYRA_DIR = os.environ.get("MYRA_DIR", "/home/<user>/myra")
+MYRA_DIR = os.environ.get("MYRA_DIR", "/srv/backend/myra")
 ENV_FAJL = os.path.join(MYRA_DIR, ".env")
 KONTENER = "myra-backend"
 IMAGE = "myra-backend"
@@ -93,6 +93,9 @@ def env_beolvas(utvonal):
 ENV = env_beolvas(ENV_FAJL)
 
 
+
+
+
 SMTP_HOST = ENV.get("MYRA_SMTP_HOST_LOCAL") or ENV.get("MYRA_SMTP_HOST") or "smtp.protonmail.ch"
 try:
     SMTP_PORT = int(ENV.get("MYRA_SMTP_PORT_LOCAL") or ENV.get("MYRA_SMTP_PORT") or 587)
@@ -101,13 +104,13 @@ except ValueError:
 SMTP_USER = ENV.get("MYRA_SMTP_USER", "")
 SMTP_PASSWORD = ENV.get("MYRA_SMTP_PASSWORD", "")
 MAIL_FROM = ENV.get("MYRA_MAIL_FROM") or "noreply@myra-project.hu"
-# A riasztas a rendszer feladojatol megy, de emberhez kell erkeznie.
+
 CONTACT = ENV.get("MYRA_CONTACT_EMAIL") or "info@myra-project.hu"
 SMTP_TLS_VERIFY = (ENV.get("MYRA_SMTP_TLS_VERIFY") or "true").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _tls_context():
-    """TLS-kontextus. A Bridge onnalairt tanusitvanyanal az ellenorzes kikapcsol."""
+    """TLS-kontextus. A Bridge önaláírt tanúsítványánál az ellenőrzés kikapcsol."""
     ctx = ssl.create_default_context()
     if not SMTP_TLS_VERIFY:
         ctx.check_hostname = False

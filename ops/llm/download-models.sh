@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# A Myra kis modelljeinek letoltese ~/gguf ala (16 parhuzamos kapcsolat), majd meretellenorzes.
+
 set -u
 cd ~/gguf || exit 1
 dl() { aria2c -c -x 16 -s 16 --console-log-level=warn --summary-interval=0 -o "$1" "$2"; }

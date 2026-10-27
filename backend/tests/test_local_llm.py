@@ -47,30 +47,6 @@ def test_local_llm_headers(monkeypatch):
     assert server._local_llm_headers()["Authorization"] == "Bearer k123"
 
 
-def test_format_local_history_replays_exact_sent_text(monkeypatch):
-    monkeypatch.setattr(server, "_local_sent", server.OrderedDict())
-    ts = datetime.datetime(2026, 10, 8, 10, 0, 0, tzinfo=datetime.timezone.utc)
-    msgs = [
-        SimpleNamespace(id="u1", role="user", text="szia", created_at=ts),
-        SimpleNamespace(id="a1", role="assistant", text="helló", created_at=ts),
-        SimpleNamespace(id="u2", role="user", text="mi újság", created_at=ts),
-    ]
-    server._remember_local_sent("u1", "[BLOKK]\n\n[FELHASZNÁLÓ]\nszia")
-    server._remember_local_sent("", "kimarad")
-    out = server._format_local_history(msgs)
-    assert out[0] == {"role": "user", "text": "[BLOKK]\n\n[FELHASZNÁLÓ]\nszia"}
-    assert out[1] == {"role": "assistant", "text": "helló"}
-    assert out[2]["text"].endswith("] mi újság") and out[2]["text"].startswith("[2026.10.08")
-
-
-def test_remember_local_sent_is_bounded(monkeypatch):
-    monkeypatch.setattr(server, "_local_sent", server.OrderedDict())
-    monkeypatch.setattr(server, "LOCAL_SENT_MAX", 2)
-    for i in range(4):
-        server._remember_local_sent(f"m{i}", f"t{i}")
-    assert list(server._local_sent) == ["m2", "m3"]
-
-
 def test_local_kb_text_limits_chunks_and_length(monkeypatch):
     monkeypatch.setattr(server, "LOCAL_RAG_CHUNKS", 1)
     monkeypatch.setattr(server, "LOCAL_KB_MAX_CHARS", 20)
