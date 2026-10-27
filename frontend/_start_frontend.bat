@@ -1,7 +1,7 @@
 @echo off
 REM Myra frontend - build + helyi kiszolgalas
 REM A paletta a patch-dist lepesben kerul be, ezert nem eleg az "expo start".
-cd /d "C:\Users\User\OneDrive\Desktop\Myra Project\frontend"
+cd /d "%~dp0"
 call npm run export || goto :hiba
 call npm run patch-dist || goto :hiba
 echo.

@@ -76,9 +76,9 @@ jobs:
         run: bandit -r backend/ -x backend/tests,backend/data,backend/.venv -ll
 
       - name: Run pip-audit dependency scan
-        # A fastembed 0.9.x <13-ra korlátozza a Pillow-t, ezért a Pillow 12.3.0
-        # CVE-i nem javíthatók. Átmeneti, dokumentált kivétel: a kapu csak a
-        # nem-Pillow sebezhetőségekre bukik.
+
+
+
         run: |
           pip-audit -r backend/requirements.txt --format json -o audit.json || true
           python - <<'PY'

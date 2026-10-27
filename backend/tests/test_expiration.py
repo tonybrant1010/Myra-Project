@@ -36,8 +36,8 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 TestingSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
 
-# Teszt-fixtúra: valódi kulcsformátum, de futásidőben áll össze, így a
-# titokszkenerek nem találják meg a repóban. Ide SOHA ne kerüljön valódi kulcs.
+
+
 FAKE_GEMINI_KEY = "AIza" + "Sy" + "A" * 33
 
 async def override_get_db():
@@ -498,7 +498,7 @@ async def test_expiration_scenarios():
                 profile="Minden rendben van."
             )
             db.add(sc)
-            
+
             now = datetime.datetime.now(timezone.utc)
             verified_at = now - datetime.timedelta(days=verified_days_ago)
             user = User(
@@ -511,7 +511,7 @@ async def test_expiration_scenarios():
                 code_verified_at=verified_at
             )
             db.add(user)
-            
+
             submission = QuizSubmission(
                 id=session_id,
                 user_id=user_id,
@@ -521,22 +521,22 @@ async def test_expiration_scenarios():
                 created_at=verified_at
             )
             db.add(submission)
-            
+
             await db.commit()
-            
+
             res = await db.execute(select(User).where(User.id == user_id))
             db_user = res.scalar_one()
             app.dependency_overrides[get_current_user] = lambda: db_user
 
     await setup_data(verified_days_ago=28, user_id=1, session_id="session-1234")
-    
+
     headers = {"Authorization": "Bearer fake-token"}
     r = client.get("/api/codes/me", headers=headers)
     assert r.status_code == 200
     data = r.json()
     assert data["is_expired"] is False
     assert data["days_remaining"] == 2
-    
+
     r = client.get("/api/auth/me", headers=headers)
     assert r.status_code == 200
     user_data = r.json()["user"]
@@ -544,19 +544,19 @@ async def test_expiration_scenarios():
     assert user_data["code_days_remaining"] == 2
 
     await setup_data(verified_days_ago=31, user_id=2, session_id="session-5678")
-    
+
     r = client.get("/api/codes/me", headers=headers)
     assert r.status_code == 200
     data = r.json()
     assert data["is_expired"] is True
     assert data["days_remaining"] == 0
-    
+
     r = client.get("/api/auth/me", headers=headers)
     assert r.status_code == 200
     user_data = r.json()["user"]
     assert user_data["is_code_expired"] is True
     assert user_data["code_days_remaining"] == 0
-    
+
     r = client.post("/api/chat/send", json={"message": "Szia", "session_id": "session-5678"}, headers=headers)
     assert r.status_code == 403
     assert r.json()["detail"] == "Ez a mérési ciklus lezárult. Kérjük, tölts ki egy új kérdőívet."

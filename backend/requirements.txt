@@ -1,37 +1,33 @@
-# Web framework
+
 fastapi==0.138.1
 uvicorn==0.25.0
 starlette==1.3.1
 python-multipart==0.0.32
 
-# Database
+
 sqlalchemy==2.0.49
 aiosqlite==0.22.1
 asyncpg==0.31.0
 
-# Auth & Security
+
 passlib==1.7.4
 bcrypt==4.1.3
 PyJWT==2.15.1
 
-# HTTP client
+
 httpx==0.28.1
 
-# Config & validation
+
 python-dotenv==1.2.2
 pydantic==2.13.4
 email-validator==2.3.0
 
-# PDF
-pypdf==6.21.1
-fpdf2==2.8.7
-# A fpdf2/fastembed tranzitív függősége. A fastembed 0.9.0 is <13-ra
-# korlátozza a Pillow-t, ezért a 13.0.0 nem telepíthető mellé; a 12.3.0
-# CVE-it a CI dokumentált kivételként kezeli, amíg a fastembed engedi a 13-at.
-pillow<13,>=12.3.0
 
-# Local embeddings (ONNX Runtime, no PyTorch)
+pypdf==6.19.0
+fpdf2==2.8.7
+
+
 fastembed==0.8.0
 
-# Helyi beszedfelismeres (diktalas; CPU-n, int8)
+
 faster-whisper==1.2.1

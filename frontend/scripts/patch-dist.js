@@ -70,8 +70,8 @@ function envNumber(name, fallback, min, max) {
 
 const normalRequestMaxBytes = envNumber('API_REQUEST_MAX_BYTES', 1024 * 1024, 64 * 1024, 10 * 1024 * 1024);
 const uploadRequestMaxBytes = envNumber('KB_PDF_UPLOAD_MAX_BYTES', 25 * 1024 * 1024, 1024 * 1024, 100 * 1024 * 1024);
-// A lánc sorrendje: backend LLM-keret (45s) < proxy timeout (55s) < Vercel függvény-limit (60s).
-// Korábban a proxy 30s-nál bontott, miközben a backend még percekig dolgozott.
+
+
 const proxyTimeoutMs = envNumber('MYRA_PROXY_TIMEOUT_MS', 55000, 5000, 120000);
 
 function requestBodyLimit(cleanPath) {
@@ -316,15 +316,15 @@ if (!html.includes("mobile-web-app-capable")) {
 }
 
 
-// --- Nappali / ejszakai paletta -------------------------------------------
-//
-// A palettat ITT kell beszurni, nem az app/+html.tsx-ben: az app.json-ban
-// web.output = "single", es ilyenkor az Expo Router nem hasznalja a +html.tsx-et,
-// hanem a sajat alap sablonjabol general index.html-t. (2026-08-16-an ellenorizve:
-// az exportalt fajlban lang="en" all, a +html.tsx-ben viszont lang="hu".)
-//
-// A boot szkript az elso festes ELOTT visszaallitja a korabban valasztott modot,
-// kulonben minden oldalbetoltesnel felvillanna a nappali paletta.
+
+
+
+
+
+
+
+
+
 const themeCssPath = path.join(__dirname, "theme-tokens.css");
 const themeBoot =
   'try{if(localStorage.getItem("myra.theme.mode")==="night")' +
@@ -357,8 +357,8 @@ if (indexChanged) {
 }
 
 
-// Vegso ellenorzes: ha a paletta barmi miatt nem kerult be, inkabb alljon meg
-// a deploy, mint hogy szinek nelkuli oldal menjen ki.
+
+
 const vegleges = fs.readFileSync(indexPath, "utf8");
 if (!vegleges.includes("--myra-bg") || !vegleges.includes("myra.theme.mode")) {
   throw new Error("A paletta nem kerult be a dist/index.html-be - a deploy leall.");

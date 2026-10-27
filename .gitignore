@@ -144,3 +144,9 @@ _pdf_out/
 
 # Leallitas-jelzo (futasideju allapot, nem verziokovetett)
 /control/
+/backups/
+
+# QA-eszkoz futasideju adatai: riportok, sessionok, lokalis .env (API-kulcs!)
+tools/**/data/
+tools/**/.env
+tools/**/tests/_result.txt

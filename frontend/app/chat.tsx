@@ -27,9 +27,7 @@ import type { ViewStyle } from "react-native";
 const webBlur = (px: number) => ({ backdropFilter: `blur(${px}px)` }) as ViewStyle;
 
 
-/** Enterrel küldés CSAK asztali gépen. Érintőképernyős eszközön az Enter marad
- *  sortörés, különben a virtuális billentyűzet return gombja félkész üzeneteket
- *  küldene ki. A "(pointer: fine)" az egér/trackpad jelenlétét jelzi. */
+
 const IS_DESKTOP_WEB = (() => {
   if (Platform.OS !== "web") return false;
   const g: any = globalThis as any;
@@ -46,15 +44,15 @@ const IS_DESKTOP_WEB = (() => {
 const MYRA_AVATAR = require("@/assets/images/myra-avatar.png");
 const CHAT_MESSAGE_MAX_CHARS = 8000;
 
-// A backend akkor is elmenti Myra válaszát, ha a küldő kérés közben elszállt: a
-// szerveroldali proxy (Caddy) időkorlátja 15 perc, egy lassabb Gemini- vagy helyi
-// modell-válasz viszont ennél is tovább tarthat (mértünk 100 mp-es, sikeresen
-// elmentett választ). Ilyenkor nincs értelme hibát mutatni — megvárjuk és beolvassuk
-// az előzményből. Összesen ~90 mp-ig próbálkozunk.
-// A helyi (CPU-n futó) modell egy válasza percekig is tarthat, főleg a hideg
-// gyorsítótár utáni első kérésnél (a prompt előfeldolgozása akár 2-3 perc).
-// Ilyenkor a backend tovább dolgozik és elmenti a választ: ennyi ideig várjuk
-// (összesen kb. 7 perc), közben a „Myra ír...” jelzés látszik.
+
+
+
+
+
+
+
+
+
 const REPLY_RECOVERY_DELAYS_MS = [3000, 5000, 7000, 10000, 15000, 20000, 30000, ...Array(20).fill(15000)];
 
 type Msg = { id: string; role: "user" | "assistant"; text: string; created_at: string; state_code?: string | null };
@@ -222,12 +220,12 @@ export default function ChatScreen() {
   const listRef = useRef<FlatList>(null);
   const mediaRecorderRef = useRef<any>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  // A backendtől kapott WAV lejátszója. A blob URL-t felszabadítjuk, különben
-  // minden felolvasás után a memóriában marad.
+
+
   const audioRef = useRef<any>(null);
-  // A `speakingId` állapot tükre. A felolvasás aszinkron: mire a hang megérkezik,
-  // a felhasználó már máshol járhat. A ref azonnal frissül, az állapot csak
-  // újrarendereléskor — ezért a lemondást ezen keresztül ellenőrizzük.
+
+
+
   const speakingIdRef = useRef<string | null>(null);
   const revealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const revealActiveRef = useRef<{ id: string; text: string } | null>(null);
@@ -365,8 +363,8 @@ export default function ChatScreen() {
   const isExpired = !!user?.is_code_expired;
   const isReadOnly = (viewSessionId !== null && viewSessionId !== activeSessionId) || isExpired;
 
-  // Proaktív Myra check-in: pár nap kihagyás után Myra nyitja újra a beszélgetést.
-  // A backend dönti el, kell-e (best effort); szálanként legfeljebb egyszer kérjük le.
+
+
   const checkinRequestedRef = useRef<string | null>(null);
   useEffect(() => {
     if (loading || !token) return;
@@ -386,7 +384,7 @@ export default function ChatScreen() {
           scrollToBottom(true);
         }
       } catch {
-        // csendes hiba — a check-in opcionális kényelmi funkció
+
       }
     })();
   }, [loading, token, viewSessionId, activeSessionId, isReadOnly, messages.length, animateAssistantMessage, scrollToBottom]);
@@ -401,7 +399,7 @@ export default function ChatScreen() {
         audio.pause();
         if (audio.src) (globalThis as any).URL?.revokeObjectURL?.(audio.src);
       } catch {
-        // a lejátszó eldobása sosem buktathatja meg a hívót
+
       }
       audioRef.current = null;
     }
@@ -409,7 +407,7 @@ export default function ChatScreen() {
     setSpeakingId(null);
   }, []);
 
-  // Ha a felhasználó elnavigál felolvasás közben, a hang ne szóljon tovább.
+
   useEffect(() => () => stopSpeech(), [stopSpeech]);
 
   const stopDictation = useCallback(() => {
@@ -433,7 +431,7 @@ export default function ChatScreen() {
       return;
     }
     try {
-      // A hang a saját szerverre megy (helyi Whisper), külső szolgáltatóhoz nem.
+
       const stream = await mediaDevices.getUserMedia({ audio: true });
       const recorder = new Recorder(stream);
       mediaRecorderRef.current = recorder;
@@ -469,9 +467,7 @@ export default function ChatScreen() {
     }
   }, [input, listening, stopDictation, token]);
 
-  /** Myra hangja. A backend `/api/tts/speak` végpontja adja a WAV-ot; a hang helyben,
-   *  a szerveren futó Piper motorral (magyar női hang) készül. A backend lemezen
-   *  gyorsítótáraz, így egy már felolvasott üzenet másodszorra azonnal jön. */
+
   const speakMessage = useCallback(async (msg: Msg) => {
     if (Platform.OS !== "web") {
       setVoiceStatus("A felolvasás ebben a környezetben nem elérhető.");
@@ -486,7 +482,7 @@ export default function ChatScreen() {
     const text = (msg.text || "").trim();
     if (!text) return;
 
-    // Azonnal aktívra váltunk, hogy a gomb visszajelezzen a hálózati várakozás alatt is.
+
     speakingIdRef.current = msg.id;
     setSpeakingId(msg.id);
     setVoiceStatus(null);
@@ -499,7 +495,7 @@ export default function ChatScreen() {
       });
       if (!r.ok) throw new Error(String(r.status));
 
-      // Közben a felhasználó megnyomhatta újra a gombot vagy elnavigálhatott.
+
       if (speakingIdRef.current !== msg.id) return;
 
       const blob = await r.blob();
@@ -526,8 +522,7 @@ export default function ChatScreen() {
     }
   }, [token, speakingId, stopSpeech]);
 
-  /** Elszállt küldés után megnézi, megérkezett-e mégis Myra válasza az előzménybe.
-   *  Visszaadja a friss üzenetlistát, ha igen — különben null. */
+
   const recoverPendingReply = useCallback(async (sid: string | null, sentText: string): Promise<Msg[] | null> => {
     const url = sid ? `/api/chat/history?session_id=${sid}` : "/api/chat/history";
     for (const delay of REPLY_RECOVERY_DELAYS_MS) {
@@ -537,7 +532,7 @@ export default function ChatScreen() {
         if (!r.ok) continue;
         const hist = await r.json();
         const list: Msg[] = hist.messages || [];
-        // Az elküldött üzenetünk utolsó előfordulása után kell lennie assistant válasznak.
+
         let sentIndex = -1;
         for (let i = list.length - 1; i >= 0; i -= 1) {
           if (list[i].role === "user" && list[i].text === sentText) {
@@ -549,16 +544,13 @@ export default function ChatScreen() {
           return list;
         }
       } catch {
-        // hálózati hiba a lekérdezés közben — jöhet a következő próbálkozás
+
       }
     }
     return null;
   }, [token]);
 
-  /** A /api/chat/send-stream SSE-válaszát olvassa. A "text" esemény az eddig megírt
-   * teljes szöveget hozza, a "done" ugyanazt, amit a /api/chat/send adna, az "error"
-   * pedig státuszt és üzenetet. Ha a stream végeredmény nélkül zárul, kivételt dob,
-   * és a hívó a megszokott módon megnézi, elkészült-e közben a válasz. */
+
   const readChatStream = async (r: Response, onText: (text: string) => void): Promise<any> => {
     const reader = r.body!.getReader();
     const decoder = new TextDecoder();
@@ -602,16 +594,16 @@ export default function ChatScreen() {
       created_at: new Date().toISOString(),
       state_code: user?.state_code || null,
     };
-    // Íródás közben ez a buborék mutatja Myra válaszát; a végén a mentett üzenet váltja.
+
     const streamId = `stream-${Date.now()}`;
     let streamStarted = false;
     setMessages((m) => [...m, optimistic]);
     scrollToBottom(true);
 
     const showSendError = async (status: number, detail?: string) => {
-      // 500/502/504 esetén a backend jó eséllyel MÉG DOLGOZIK (vagy már végzett is,
-      // csak a proxy adta fel) — ilyenkor előbb megvárjuk a választ, és csak utána
-      // mondjuk azt, hogy nem sikerült. A 4xx-ek (kvóta, jogosultság) végleges hibák.
+
+
+
       if (status >= 500) {
         const recovered = await recoverPendingReply(activeSessionId, text);
         if (recovered) {
@@ -635,15 +627,15 @@ export default function ChatScreen() {
         errorMessage,
       ]);
       animateAssistantMessage(errorMessage);
-      // A beírt szöveg SOHA ne vesszen el hibánál: visszakerül a beviteli mezőbe,
-      // hogy egyetlen gombnyomással újraküldhető legyen.
+
+
       setInput(text);
       scrollToBottom(true);
     };
 
     const onStreamText = (partial: string) => {
       if (!partial) {
-        // A helyi modell félúton elakadt, az API-válasz egyben jön: a félkész szöveg eltűnik.
+
         if (streamStarted) {
           streamStarted = false;
           setStreamingId(null);
@@ -687,7 +679,7 @@ export default function ChatScreen() {
         data = await r.json();
       }
       const assistantMessage = data.assistant_message as Msg;
-      // Amit már íródás közben látott, azt nem gépeljük ki még egyszer.
+
       if (streamStarted) animatedMessageIdsRef.current.add(assistantMessage.id);
       setMessages((m) => [
         ...m.filter((x) => x.id !== optimistic.id && x.id !== streamId),
@@ -697,8 +689,8 @@ export default function ChatScreen() {
       if (!streamStarted) animateAssistantMessage(assistantMessage);
       scrollToBottom(true);
     } catch {
-      // Megszakadt kapcsolat: a kérés ettől még elérhette a backendet, ezért itt is
-      // előbb megnézzük, megjött-e a válasz, és csak utána hibázunk.
+
+
       const recovered = await recoverPendingReply(activeSessionId, text).catch(() => null);
       if (recovered) {
         finishReveal();
@@ -711,8 +703,8 @@ export default function ChatScreen() {
         scrollToBottom(true);
         return;
       }
-      // Hálózati hiba / megszakadt kapcsolat: enélkül az optimista buborék bent maradt
-      // "elküldve" látszattal, a felhasználó pedig semmilyen visszajelzést nem kapott.
+
+
       const networkError: Msg = {
         id: `err-${Date.now()}`,
         role: "assistant",
@@ -730,7 +722,7 @@ export default function ChatScreen() {
     }
   };
 
-  /** Asztali gépen az Enter küld, a Shift+Enter (és a módosítós változatok) sortörnek. */
+
   const handleInputKeyPress = (e: any) => {
     if (!IS_DESKTOP_WEB) return;
     const native = e?.nativeEvent || {};

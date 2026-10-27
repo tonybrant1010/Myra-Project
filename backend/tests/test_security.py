@@ -59,12 +59,12 @@ def anyio_backend():
 def test_client_ip_no_trust_proxy():
     if "TRUST_PROXY" in os.environ:
         del os.environ["TRUST_PROXY"]
-        
+
     mock_request = Mock(spec=Request)
     mock_request.headers = {"x-forwarded-for": "1.2.3.4, 5.6.7.8"}
     mock_request.client = Mock()
     mock_request.client.host = "127.0.0.1"
-    
+
     assert _client_ip(mock_request) == "127.0.0.1"
 
 def test_client_ip_with_trust_proxy_true():
@@ -74,7 +74,7 @@ def test_client_ip_with_trust_proxy_true():
         mock_request.headers = {"x-forwarded-for": "1.2.3.4, 5.6.7.8"}
         mock_request.client = Mock()
         mock_request.client.host = "127.0.0.1"
-        
+
         assert _client_ip(mock_request) == "1.2.3.4"
     finally:
         del os.environ["TRUST_PROXY"]
@@ -86,7 +86,7 @@ def test_client_ip_with_trust_proxy_false():
         mock_request.headers = {"x-forwarded-for": "1.2.3.4, 5.6.7.8"}
         mock_request.client = Mock()
         mock_request.client.host = "127.0.0.1"
-        
+
         assert _client_ip(mock_request) == "127.0.0.1"
     finally:
         del os.environ["TRUST_PROXY"]
@@ -211,7 +211,7 @@ def test_clean_session_id_rejects_unsafe_values():
 
 
 def test_safe_download_filename_strips_unsafe_header_characters():
-    assert _safe_download_filename("../Antal Teszt\r\nX-Bad: 1.csv") == "Antal_Teszt_X-Bad_1.csv"
+    assert _safe_download_filename("../Test User\r\nX-Bad: 1.csv") == "Test_User_X-Bad_1.csv"
     assert _safe_download_filename("...") == "download"
     assert _safe_download_filename("a" * 200 + ".csv") == "a" * 120
 
@@ -310,8 +310,8 @@ def test_validate_pdf_bytes_checks_magic_header():
     assert exc_info.value.status_code == 400
 
 
-# Teszt-fixtúra: valódi kulcsformátum, de futásidőben áll össze, így a
-# titokszkenerek nem találják meg a repóban. Ide SOHA ne kerüljön valódi kulcs.
+
+
 FAKE_GEMINI_KEY = "AIza" + "Sy" + "A" * 33
 
 
@@ -641,7 +641,7 @@ async def test_call_llm_anthropic_error_masking(mock_post):
     mock_response.status_code = 500
     mock_response.text = "Internal Server Error: API Key expired or invalid signature or secret prompt leaked"
     mock_post.return_value = mock_response
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await _call_llm(
             provider="anthropic",
@@ -651,7 +651,7 @@ async def test_call_llm_anthropic_error_masking(mock_post):
             history=[],
             user_message="hello"
         )
-    
+
     assert exc_info.value.status_code == 502
     assert "leak" not in exc_info.value.detail
     assert "expired" not in exc_info.value.detail
@@ -664,7 +664,7 @@ async def test_call_llm_gemini_error_masking(mock_post):
     mock_response.status_code = 500
     mock_response.text = "Gemini failure: User quota exceeded, developer info leaked"
     mock_post.return_value = mock_response
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await _call_llm(
             provider="gemini",
@@ -674,7 +674,7 @@ async def test_call_llm_gemini_error_masking(mock_post):
             history=[],
             user_message="hello"
         )
-    
+
     assert exc_info.value.status_code == 502
     assert "quota" not in exc_info.value.detail
     assert "Gemini API hiba" in exc_info.value.detail
@@ -682,36 +682,36 @@ async def test_call_llm_gemini_error_masking(mock_post):
 def test_verify_proxy_secret_middleware():
     from fastapi.testclient import TestClient
     import server
-    
+
     @server.app.get("/test-middleware-ping")
     def ping():
         return {"ping": "pong"}
-    
+
     orig_env = os.environ.get("ENVIRONMENT")
     orig_secret = server.MYRA_PROXY_SECRET
-    
+
     client = TestClient(server.app)
-    
+
     try:
         os.environ["ENVIRONMENT"] = "development"
         r = client.get("/test-middleware-ping")
         assert r.status_code == 200
         assert r.json() == {"ping": "pong"}
-        
+
         os.environ["ENVIRONMENT"] = "production"
         server.MYRA_PROXY_SECRET = "test-proxy-secret-123"
-        
+
         r = client.get("/test-middleware-ping")
         assert r.status_code == 403
         assert r.json()["detail"] == "Direct access to origin is forbidden."
-        
+
         r = client.get("/test-middleware-ping", headers={"X-Myra-Proxy-Secret": "wrong-secret"})
         assert r.status_code == 403
-        
+
         r = client.get("/test-middleware-ping", headers={"X-Myra-Proxy-Secret": "test-proxy-secret-123"})
         assert r.status_code == 200
         assert r.json() == {"ping": "pong"}
-        
+
         r = client.options("/test-middleware-ping", headers={"Origin": "https://www.myra-project.hu"})
         assert r.status_code != 403 or (r.status_code == 403 and r.json().get("detail") != "Direct access to origin is forbidden.")
 

@@ -413,8 +413,8 @@ export default function AdminSettingsScreen() {
 
   const dockerComposeDown = async () => {
     Alert.alert(
-      "Rendszer leállítása",
-      "Biztosan le akarod állítani a rendszert (docker compose down)? Ez a frontendet és a backendet is leállítja, így a szolgáltatás elérhetetlenné válik!",
+      "Backend leállítása",
+      "Biztosan le akarod állítani a backendet? Csak a backend konténer áll le — a frontend (Caddy) elérhető marad, de az API nem válaszol, amíg a konténer újra nem indul. Újraindítás: docker compose up -d backend.",
       [
         { text: "Mégse", style: "cancel" },
         {
@@ -433,12 +433,12 @@ export default function AdminSettingsScreen() {
               });
               if (r.ok) {
                 setEmergencyPassword("");
-                setMsg("Leállítás elindítva. A szerver le fog állni, a konténerek leállnak.");
+                setMsg("Backend leállítás elindítva. Az API néhány másodperc múlva nem válaszol; a frontend elérhető marad. Újraindítás: docker compose up -d backend.");
               } else {
                 setErr("Leállítás sikertelen.");
               }
             } catch (e: any) {
-              setErr(e.message || "Hiba (a szerver valószínűleg már leállt).");
+              setErr(e.message || "Hiba (a backend valószínűleg már leállt).");
             } finally {
               setDownBusy(false);
             }
@@ -1072,7 +1072,7 @@ export default function AdminSettingsScreen() {
                   {downBusy ? (
                     <ActivityIndicator color={theme.white} />
                   ) : (
-                    <T variant="label" color={theme.white} style={{ fontWeight: "bold" }}>Rendszer leállítása (Docker Compose Down)</T>
+                    <T variant="label" color={theme.white} style={{ fontWeight: "bold" }}>Backend leállítása (csak a backend konténer)</T>
                   )}
                 </TouchableOpacity>
 
@@ -1134,8 +1134,7 @@ function severityColor(severity: string) {
   return theme.accent;
 }
 
-/** A figyelo helyi ido szerinti "YYYY-MM-DD HH:MM:SS"-t ir, a backend ISO-t.
- *  Mindkettonel a ma torteneteknel csak az orat mutatjuk. */
+
 function formatEventTime(raw: string | null) {
   if (!raw) return "";
   const d = new Date(raw);
@@ -1189,7 +1188,7 @@ function downloadBackup(token: string | null, setErr: (message: string) => void)
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      // A szerver adja a fájlnevet (pl. myra_backup_20261004_1700.sql.gz); ha nincs, saját nevet adunk.
+
       const cd = r.headers.get("Content-Disposition") || "";
       const m = cd.match(/filename="?([^";]+)"?/i);
       a.download = m?.[1] || `myra_backup_${new Date().toISOString().slice(0, 10)}.sql.gz`;

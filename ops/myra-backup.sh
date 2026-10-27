@@ -1,23 +1,25 @@
 #!/bin/bash
-# Myra mentes (2026-10-13).
-# Amit ment:
-#   - orankent: a Supabase public sema teljes dumpja + egy kisebb felhasznaloi dump
-#   - naponta: konfig-tarball (.env, compose, server.py, tudasanyag PDF-ek, uzemeltetesi
-#     konfigok: Caddy, fail2ban, rendszerd unitok) + a frontend build (/srv/myra)
-#   - minden futasnal: tukorzes a /mnt/win-re (ha csatolva) ES atmasolas a modellszerverre
-#     (<llm-host>) a WireGuard-tunnelen keresztul -> a backend host kiesese nem viszi el a mentest
-# Megorzes: NEM ido, hanem DARABSZAM alapjan (lentebb allithato).
-# Kell hozza: postgresql-client (>=17), rsync, es jelszo nelkuli SSH a <llm-host> fele.
+
+
+
+
+
+
+
+
+
 set -uo pipefail
 
-SRC=/home/<user>/myra
-LOCAL=/home/<user>/myra-backups
-FRONTEND=/srv/myra
-MIRROR=/mnt/win/MyraBackup
-REMOTE="<user>@<llm-wg-ip>:/home/<user>/myra-backups/"
-SSH_KEY="$HOME/.ssh/id_ed25519"
+SRC="${MYRA_DIR:-/srv/backend/myra}"
+LOCAL="${MYRA_BACKUP_DIR:-/srv/myra-backups}"
+FRONTEND="${MYRA_FRONTEND_DIR:-/srv/myra}"
+MIRROR="${MYRA_BACKUP_MIRROR:-/mnt/myra-backups}"
+REMOTE_HOST="${MYRA_BACKUP_REMOTE_HOST:-}"
+REMOTE_DIR="${MYRA_BACKUP_REMOTE_DIR:-myra-backups}"
+REMOTE_TARGET="${REMOTE_HOST}:${REMOTE_DIR%/}/"
+SSH_KEY="${MYRA_BACKUP_SSH_KEY:-$HOME/.ssh/id_ed25519}"
 
-# --- Megorzes darabszammal (a "ne legyen vegtelen" elv) ---
+
 DB_ORANKENT_DB=6      # orankenti teljes DB dump
 DB_ORANKENT_USER=6    # orankenti felhasznaloi dump
 NAPI_KONFIG=7         # napi konfig-tarball
@@ -30,7 +32,7 @@ TODAY=$(date +%Y%m%d)
 mkdir -p "$LOCAL/orankent" "$LOCAL/napi"
 chmod 700 "$LOCAL"
 
-# Kapcsolodasi adatok a .env DATABASE_URL-jebol -> PG* kornyezeti valtozok.
+
 eval "$(python3 - "$SRC/.env" <<'PY'
 import shlex, sys
 from urllib.parse import urlparse, unquote
@@ -61,14 +63,14 @@ fi
 
 DUMP="$LOCAL/orankent/db-$STAMP.sql.gz"
 pg_dump -n public --no-owner --no-privileges --clean --if-exists | gzip > "$DUMP"
-# Ures vagy csonka dumpot nem tartunk meg: az hamis biztonsagerzetet ad.
+
 if [ ! -s "$DUMP" ] || [ "$(stat -c%s "$DUMP")" -lt 1000 ]; then
   rm -f "$DUMP"
   echo "HIBA: a pg_dump ures vagy csonka, a mentes kimaradt"
   exit 1
 fi
-# Kisebb, felhasznaloi mentes az admin felulet "Adatbazis mentes letoltese" gombjahoz:
-# minden tabla, de a knowledge_chunks tartalma nelkul (az ujraindexelheto a PDF-ekbol).
+
+
 USERDUMP="$LOCAL/orankent/userdata-$STAMP.sql.gz"
 pg_dump -n public --no-owner --no-privileges --clean --if-exists \
   --exclude-table-data=public.knowledge_chunks | gzip > "$USERDUMP"
@@ -78,11 +80,11 @@ if [ ! -s "$USERDUMP" ] || [ "$(stat -c%s "$USERDUMP")" -lt 1000 ]; then
 fi
 unset PGPASSWORD
 
-# --- Napi egyszeri resz ---
+
 if [ ! -f "$LOCAL/napi/myra-$TODAY.tar.gz" ]; then
-  # Uzemeltetesi konfigok osszegyujtese egy staging mappaba. A /etc/wireguard/wg0.conf
-  # SZANDEKOSAN nincs a listan: privat kulcs van benne. Helyette a nyilvantartast
-  # mentjuk (public kulcsok + wg show), mert a privat kulcsok ujrageneralhatok.
+
+
+
   STAGE="$LOCAL/.stage-$TODAY"
   rm -rf "$STAGE"; mkdir -p "$STAGE/konfig"
   for f in /etc/caddy/Caddyfile /etc/fail2ban/filter.d /etc/fail2ban/jail.d \
@@ -106,13 +108,13 @@ if [ ! -f "$LOCAL/napi/myra-$TODAY.tar.gz" ]; then
   cp "$DUMP" "$LOCAL/napi/db-$TODAY.sql.gz"
 fi
 
-# Frontend build mentese (napi egyszer). Ez a kiszolgalt build, ami visszaallithato
-# azonnal, ujraforditas nelkul.
+
+
 if [ -d "$FRONTEND" ] && [ ! -f "$LOCAL/napi/frontend-$TODAY.tar.gz" ]; then
   tar -czf "$LOCAL/napi/frontend-$TODAY.tar.gz" -C "$FRONTEND" . 2>/dev/null
 fi
 
-# --- Forgatas: darabszam alapjan, nem ido alapjan ---
+
 torles_darabszam() {  # $1=mappa $2=minta $3=megtartott darab
   ls -1t "$1"/$2 2>/dev/null | tail -n +$(( $3 + 1 )) | while read -r f; do rm -f "$f"; done
 }
@@ -123,7 +125,7 @@ torles_darabszam "$LOCAL/napi"     'db-*.sql.gz'       "$NAPI_DB"
 torles_darabszam "$LOCAL/napi"     'frontend-*.tar.gz' "$FRONTEND_MEGTART"
 torles_darabszam "$LOCAL/napi"     'konfig-*.tar.gz'   "$NAPI_KONFIG"
 
-# --- Tukorzes a masodik lemezre (ha csatolva) ---
+
 if mountpoint -q /mnt/win; then
   mkdir -p "$MIRROR"
   rsync -a --delete "$LOCAL/" "$MIRROR/"
@@ -131,15 +133,15 @@ else
   echo "FIGYELEM: /mnt/win nincs csatolva, a tukrozes kimaradt"
 fi
 
-# --- Atmasolas a modellszerverre a WireGuard-tunnelen (off-host mentes) ---
-if ssh -i "$SSH_KEY" -o BatchMode=yes -o ConnectTimeout=8 <user>@<llm-wg-ip> true 2>/dev/null; then
-  if rsync -a --delete -e "ssh -i $SSH_KEY -o BatchMode=yes" "$LOCAL/" "$REMOTE" 2>/dev/null; then
-    echo "off-host mentes: <llm-host> (<llm-wg-ip>) frissitve"
+
+if [ -n "$REMOTE_HOST" ] && ssh -i "$SSH_KEY" -o BatchMode=yes -o ConnectTimeout=8 "$REMOTE_HOST" true 2>/dev/null; then
+  if rsync -a --delete -e "ssh -i $SSH_KEY -o BatchMode=yes" "$LOCAL/" "$REMOTE_TARGET" 2>/dev/null; then
+    echo "off-host backup target updated"
   else
-    echo "FIGYELEM: az rsync a <llm-host> fele nem sikerult"
+    echo "FIGYELEM: az rsync a távoli mentési célra nem sikerult"
   fi
 else
-  echo "FIGYELEM: nincs jelszo nelkuli SSH a <llm-host> fele, az off-host mentes kimaradt"
+  echo "FIGYELEM: az off-host SSH backup nem sikerult"
 fi
 
 echo "mentes kesz: $DUMP ($(du -h "$DUMP" | cut -f1)), helyben: $(du -sh "$LOCAL" | cut -f1), darabok: $(ls -1 "$LOCAL/orankent" | wc -l) orankenti + $(ls -1 "$LOCAL/napi" | wc -l) napi"

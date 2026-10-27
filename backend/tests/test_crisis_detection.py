@@ -106,7 +106,7 @@ class TestEpizod(unittest.TestCase):
         self.assertEqual(ep.closed_at, 2000.0)
 
     def test_idezet_nem_zarja_le_az_epizodot(self):
-        # trend=NA (idézet, tagadás): nem enyhülés, nem zárunk.
+
         _a, ep = crisis.step(None, crisis.ACUTE, crisis.NA, now=1000.0)
         action, ep = crisis.step(ep, crisis.NONE, crisis.NA, now=1100.0)
         self.assertEqual(action, crisis.ACTION_KEEP)

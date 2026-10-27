@@ -37,7 +37,7 @@ SAME = "SAME"
 BETTER = "BETTER"
 NA = "NA"
 
-# --- 3. réteg: a padló. Determinisztikus, modell nélkül is riaszt. -------------
+
 SEVERE_TERMS = [
     "öngyilkos", "ongyilkos", "szuicid", "megölöm magam", "megolom magam",
     "meg akarok halni", "nem akarok élni", "nem akarok elni", "nem akarok tovább élni",
@@ -47,23 +47,23 @@ SEVERE_TERMS = [
 ]
 SEVERE_COMPACT = ["nemakarokélni", "nemakarokelni", "megakarokhalni"]
 
-# --- 1. réteg: a prefilter. Széles, nem riaszt, csak továbbad. ----------------
+
 _BASE_PREFILTER_TERMS = [
-    # halál, önveszély
+
     "meghal", "meghalt", "halál", "halal", "véget", "veget", "végem", "vegem", "vége", "vege",
     "öngyilkos", "ongyilkos", "szuicid", "kinyír", "kinyir", "felakaszt", "kötél", "kotel",
     "kiugr", "leugr", "ablak", "gyógyszer", "gyogyszer", "tabletta", "bevettem",
-    # sérülés, vészhelyzet
+
     "vérz", "verz", "véres", "veres", "nyakam", "levegőt", "levegot", "sérül", "serul",
     "eltör", "eltor", "tűz", "tuz", "felgyújt", "felgyujt", "robban",
-    # distressz, reménytelenség
+
     "nem bírom", "nem birom", "nem akarok", "nem tudok tovább", "nem tudok tovabb",
     "bánt", "bant", "értelmetlen", "ertelmetlen", "reménytelen", "remenytelen",
     "kimerült", "kimerult", "pánik", "panik", "szorong", "depressz", "krízis", "krizis",
     "egyedül", "egyedul", "senki nem", "fáradt", "faradt",
 ]
 
-# Invariáns: a prefilter FELÜLHALMAZA a padlónak.
+
 PREFILTER_TERMS = _BASE_PREFILTER_TERMS + [
     t for t in SEVERE_TERMS if t not in _BASE_PREFILTER_TERMS
 ]
@@ -93,7 +93,7 @@ JUDGE_PROMPT = (
     "A válasz első két szava legyen a szint és a trend, utána rövid indoklás."
 )
 
-# --- epizód-műveletek ---------------------------------------------------------
+
 ACTION_OPEN = "open"
 ACTION_ESCALATE = "escalate"
 ACTION_CLOSE = "close"
@@ -151,7 +151,7 @@ def parse_verdict(raw: str):
     if not trend:
         trend = NA
 
-    # Indoklás: az első sorból kivágjuk a két kulcsszót, a maradék a leírás.
+
     reason = " ".join(text.splitlines())
     for token in (level, trend):
         if token:
@@ -204,7 +204,7 @@ def step(episode, level: str, trend: str, now: float):
             return ACTION_ESCALATE, episode
         return ACTION_KEEP, episode
 
-    # Nem ACUTE: csak akkor zárunk, ha a modell szerint egyértelműen javult.
+
     if episode is not None:
         episode.messages += 1
         episode.last_event_at = now

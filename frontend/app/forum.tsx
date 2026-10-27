@@ -391,11 +391,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(79,209,197,0.16)",
     position: "relative",
-    // A maxWidth: "85%" a SZULON (messageWrapper) van, a buborekon nem. RN-ben a
-    // flexShrink alapertelmezesben 0, ezert a buborek a sajat tartalmi szelesseget
-    // vette fel es kilogott a szulojebol. Sajat bejegyzesnel (row-reverse) balra,
-    // masenal jobbra -- innen jott, hogy az egyik telefonon az eleje, a masikon a
-    // vege hianyzott. Asztali gepen a viewport eleg szeles volt, ezert nem latszott.
+
+
+
+
+
     flexShrink: 1,
     minWidth: 0,
   },
@@ -418,9 +418,9 @@ const styles = StyleSheet.create({
   },
   messageText: {
     lineHeight: 20,
-    // Egy hosszu, szokoz nelkuli szovegfolyam (link, egybeirt szo) onmagaban
-    // szelesebb, mint a buborek -- a zsugoritas ezt egyedul nem oldja meg,
-    // torni is kell tudni.
+
+
+
     ...webWordBreak,
   },
   deleteBtn: {

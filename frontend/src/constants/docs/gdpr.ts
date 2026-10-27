@@ -3,7 +3,7 @@ export const gdprText = `ADATKEZELÉSI TÁJÉKOZTATÓ
 Hatályos: 2026. október 14.
 
 1. Az adatkezelő
-Név: Ódor Antal
+Név: [Az adatkezelő neve a telepítés előtt kitöltendő]
 Email: info@myra-project.hu
 Tevékenység jellege: magánszemélyként végzett, nem kereskedelmi célú kutatási és fejlesztési projekt
 
