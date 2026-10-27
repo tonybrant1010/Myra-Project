@@ -1083,6 +1083,14 @@ _chat_send_attempts: dict[str, dict] = {}
 CHAT_SEND_WINDOW_S = 60
 CHAT_SEND_MAX = _env_int("CHAT_SEND_MAX", 20, 5, 120)
 
+_mfa_issue_attempts: dict[str, dict] = {}
+MFA_ISSUE_WINDOW_S = 600
+MFA_ISSUE_MAX = 3
+
+_admin_emergency_attempts: dict[str, dict] = {}
+ADMIN_EMERGENCY_WINDOW_S = 60
+ADMIN_EMERGENCY_MAX = 3
+
 _tts_attempts: dict[str, dict] = {}
 TTS_WINDOW_S = 60
 TTS_MAX = _env_int("TTS_MAX", 30, 5, 200)
@@ -1132,6 +1140,21 @@ def _check_and_record_chat_limit(request: Request, user_id: int) -> None:
     _check_and_record_user_limit(
         _chat_send_attempts, request, user_id, CHAT_SEND_WINDOW_S, CHAT_SEND_MAX,
         "Túl sok üzenet rövid idő alatt. Kérlek, várj egy kicsit.",
+    )
+
+
+def _check_and_record_mfa_issue_limit(request: Request, user_id: int) -> None:
+    _check_and_record_user_limit(
+        _mfa_issue_attempts, request, user_id, MFA_ISSUE_WINDOW_S, MFA_ISSUE_MAX,
+        "Túl sok biztonsági kód kérés. Próbáld újra később.",
+    )
+
+
+def _check_and_record_admin_emergency_limit(request: Request, admin_id: int) -> None:
+    _check_and_record_user_limit(
+        _admin_emergency_attempts, request, admin_id,
+        ADMIN_EMERGENCY_WINDOW_S, ADMIN_EMERGENCY_MAX,
+        "Túl sok adminisztrátori vészművelet. Próbáld újra később.",
     )
 
 
@@ -3416,6 +3439,7 @@ async def auth_login(body: LoginBody, request: Request, background_tasks: Backgr
             "detail": "Kérjük, add meg a hitelesítő alkalmazásod kódját.",
         }
     elif needs_email_mfa and not await _is_trusted_device(db, user, body.device_token):
+        _check_and_record_mfa_issue_limit(request, user.id)
         challenge = await _create_mfa_challenge(db, user, background_tasks, purpose="login")
         return {
             "mfa_required": True,
@@ -3515,6 +3539,7 @@ async def auth_admin_action_code(
     user: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    _check_and_record_mfa_issue_limit(request, user.id)
     challenge = await _create_mfa_challenge(db, user, background_tasks, purpose="admin_action")
     await _admin_audit(db, user, request, "admin.action_code.requested")
     return {"ok": True, "challenge_id": challenge.id, "detail": "Admin biztonsági kód elküldve."}
@@ -7659,6 +7684,7 @@ async def _delayed_restart():
 
 @api.post("/admin/restart")
 async def admin_restart(body: EmergencyAdminActionBody, request: Request, admin: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    _check_and_record_admin_emergency_limit(request, admin.id)
     if not verify_password(body.current_password, admin.password_hash):
         await _admin_audit(db, admin, request, "admin.system.restart.failure", "invalid_password")
         raise HTTPException(status_code=400, detail="Hibás jelszó (jelszo).")
@@ -7686,6 +7712,7 @@ async def _delayed_down():
 
 @api.post("/admin/down")
 async def admin_down(body: EmergencyAdminActionBody, request: Request, admin: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    _check_and_record_admin_emergency_limit(request, admin.id)
     if not verify_password(body.current_password, admin.password_hash):
         await _admin_audit(db, admin, request, "admin.system.down.failure", "invalid_password")
         raise HTTPException(status_code=400, detail="Hibás jelszó (jelszo).")

@@ -48,6 +48,11 @@ token) **soha** ne commitolj — a `.gitignore` és a `.env.example` ezt hivatot
 - krízisjelzés három rétegben (előszűrő → modell → determinisztikus padló)
 - a helyi LLM csak külön engedélyezés és helyi vagy megbízható hálózati végpont megadásával indul
 
+A Gemini-kérések a harassment, hate speech, sexually explicit és dangerous content kategóriákra
+`BLOCK_NONE` értéket küldenek, hogy az érzékeny mentálhigiénés témákat ne blokkolja a szolgáltatói
+szűrő. Ez kikapcsolja ezeket a szolgáltatói blokkolásokat; az alkalmazás saját prompt- és
+krízislogikája külön réteg, és nem teljes értékű kimeneti moderáció.
+
 ## Licenc
 
 PolyForm Noncommercial 1.0.0 — nem kereskedelmi használat a licenc és a

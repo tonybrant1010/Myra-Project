@@ -29,8 +29,13 @@ Ez a Myra mentálhigiénés önismereti alkalmazás webes és mobil frontendje, 
 2. Állítsd be a backend elérését környezeti változóban, majd indítsd el a dev szervert:
    ```bash
    set EXPO_PUBLIC_BACKEND_URL=http://localhost:8001
+   set EXPO_PUBLIC_CONTROLLER_NAME=Az adatkezelő neve
    npx expo start --web
    ```
+
+   `EXPO_PUBLIC_CONTROLLER_NAME`: az adatkezelő neve, ami a GDPR-szövegben jelenik meg.
+   A repóban szándékosan placeholder szerepel (személyes adat nem kerül a forrásba);
+   **éles buildnél kötelező kitölteni**, különben a felületen a placeholder látszik.
 
 ## Vercel Élesítés
 

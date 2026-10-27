@@ -1,9 +1,16 @@
+// Az adatkezelő nevét build-időben kapja a szöveg (EXPO_PUBLIC_CONTROLLER_NAME),
+// hogy a nyilvános repóban ne szerepeljen személyes adat. A deploynak kötelező
+// kitöltenie, különben a placeholder jelenik meg a felületen.
+const CONTROLLER_NAME =
+  (process.env.EXPO_PUBLIC_CONTROLLER_NAME || "").trim() ||
+  "[Az adatkezelő neve a telepítés előtt kitöltendő]";
+
 export const gdprText = `ADATKEZELÉSI TÁJÉKOZTATÓ
 
 Hatályos: 2026. október 14.
 
 1. Az adatkezelő
-Név: [Az adatkezelő neve a telepítés előtt kitöltendő]
+Név: ${CONTROLLER_NAME}
 Email: info@myra-project.hu
 Tevékenység jellege: magánszemélyként végzett, nem kereskedelmi célú kutatási és fejlesztési projekt
 
