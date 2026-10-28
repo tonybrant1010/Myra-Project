@@ -27,7 +27,7 @@ pypdf==6.21.3
 fpdf2==2.8.7
 
 
-fastembed==0.8.0
+fastembed==0.9.1
 
 
 faster-whisper==1.2.1
