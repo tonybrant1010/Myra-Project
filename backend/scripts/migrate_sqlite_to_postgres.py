@@ -7,7 +7,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sqlalchemy import JSON, Boolean, DateTime
+from sqlalchemy import JSON, Boolean, DateTime, literal_column, select
+from sqlalchemy.dialects import sqlite
 
 
 def parse_dt(value):
@@ -40,6 +41,14 @@ def parse_json(value):
 
 def bool_value(value):
     return bool(int(value or 0))
+
+
+def read_source_rows(source, table):
+    # Compile identifiers with SQLite's dialect; '*' also supports older schemas
+    # that do not yet contain every column in the current application metadata.
+    statement = select(literal_column("*")).select_from(table)
+    source.row_factory = sqlite3.Row
+    return source.execute(str(statement.compile(dialect=sqlite.dialect())))
 
 
 def prepare_server_import(target_url):
@@ -86,8 +95,7 @@ async def migrate(source_sqlite, target_url, wipe_target=False):
         for table in tables:
             if table.name not in available:
                 continue
-            source.row_factory = sqlite3.Row
-            for raw in source.execute('SELECT * FROM "' + table.name + '"'):
+            for raw in read_source_rows(source, table):
                 row = dict(raw)
                 if table.name == "users" and row.get("totp_secret"):
                     server._decrypt_field(row["totp_secret"], purpose="totp")
