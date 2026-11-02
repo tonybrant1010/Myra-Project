@@ -919,7 +919,7 @@ async def _warm_stt_model():
 
 def _safe_upload_filename(filename: Optional[str], allowed_suffixes: tuple[str, ...]) -> str:
     raw_name = (filename or "").strip()
-    if not raw_name or "/" in raw_name or "\\" in raw_name:
+    if not raw_name or "/" in raw_name or "\\" in raw_name or ":" in raw_name:
         raise HTTPException(status_code=400, detail="Érvénytelen fájlnév.")
     safe_name = os.path.basename(raw_name)
     if safe_name in {"", ".", ".."} or safe_name.startswith("."):
@@ -932,6 +932,49 @@ def _safe_upload_filename(filename: Optional[str], allowed_suffixes: tuple[str, 
         allowed = ", ".join(allowed_suffixes)
         raise HTTPException(status_code=400, detail=f"Csak {allowed} fájl tölthető fel.")
     return safe_name
+
+
+def _kb_pdf_directory(*, create: bool = False) -> Path:
+    data_dir = ROOT_DIR / "data"
+    pdf_dir = data_dir / "kb_pdfs"
+    if data_dir.is_symlink() or pdf_dir.is_symlink():
+        raise HTTPException(status_code=400, detail="A tudásbázis könyvtára nem lehet szimbolikus hivatkozás.")
+    if create:
+        pdf_dir.mkdir(parents=True, exist_ok=True)
+    return pdf_dir.resolve()
+
+
+def _kb_pdf_path(filename: str) -> Path:
+    name = _safe_upload_filename(filename, (".pdf",))
+    pdf_dir = _kb_pdf_directory()
+    candidate = pdf_dir / name
+    if candidate.is_symlink():
+        raise HTTPException(status_code=400, detail="Szimbolikus hivatkozás nem kezelhető PDF-ként.")
+    pdf_path = candidate.resolve()
+    if not pdf_path.is_relative_to(pdf_dir) or pdf_path.parent != pdf_dir:
+        raise HTTPException(status_code=400, detail="Érvénytelen fájlnév.")
+    if pdf_path.exists() and not pdf_path.is_file():
+        raise HTTPException(status_code=400, detail="Csak szabályos PDF-fájl kezelhető.")
+    return pdf_path
+
+
+def _write_kb_pdf(filename: str, content: bytes) -> None:
+    pdf_dir = _kb_pdf_directory(create=True)
+    pdf_path = _kb_pdf_path(filename)
+    temporary = None
+    try:
+        # Publish a newly created file atomically. Replacing a destination link
+        # cannot follow it, even if it appears after the path validation above.
+        with tempfile.NamedTemporaryFile(prefix=".kb-upload-", suffix=".tmp",
+                                         dir=pdf_dir, delete=False) as output:
+            temporary = Path(output.name)
+            output.write(content)
+            output.flush()
+            os.fsync(output.fileno())
+        temporary.replace(pdf_path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 async def _read_upload_with_limit(file: UploadFile, max_bytes: int) -> bytes:
@@ -6442,11 +6485,17 @@ async def admin_get_logs(since: int = 0, admin: User = Depends(require_admin)):
 
 @api.get("/admin/kb/files")
 async def admin_list_kb_files(admin: User = Depends(require_admin)):
-    pdf_dir = ROOT_DIR / "data" / "kb_pdfs"
+    pdf_dir = _kb_pdf_directory()
     files = []
     if pdf_dir.exists():
-        for f in sorted(pdf_dir.glob("*.pdf")):
-            stat = f.stat()
+        for f in sorted(pdf_dir.iterdir()):
+            if f.suffix.lower() != ".pdf" or f.is_symlink() or not f.is_file():
+                continue
+            try:
+                pdf_path = _kb_pdf_path(f.name)
+                stat = pdf_path.stat()
+            except (HTTPException, OSError):
+                continue
             files.append({
                 "name": f.name,
                 "size": stat.st_size,
@@ -6457,9 +6506,8 @@ async def admin_list_kb_files(admin: User = Depends(require_admin)):
 
 @api.delete("/admin/kb/files/{filename}")
 async def admin_delete_kb_file(filename: str, request: Request, admin: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
-    if "/" in filename or "\\" in filename or filename == ".." or not filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Érvénytelen fájlnév.")
-    pdf_path = ROOT_DIR / "data" / "kb_pdfs" / filename
+    filename = _safe_upload_filename(filename, (".pdf",))
+    pdf_path = _kb_pdf_path(filename)
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="A fájl nem található.")
     try:
@@ -6480,13 +6528,10 @@ async def admin_upload_kb_file(
     db: AsyncSession = Depends(get_db)
 ):
     filename = _safe_upload_filename(file.filename, (".pdf",))
-    pdf_dir = ROOT_DIR / "data" / "kb_pdfs"
-    pdf_dir.mkdir(parents=True, exist_ok=True)
-    pdf_path = pdf_dir / filename
     try:
         content = await _read_upload_with_limit(file, KB_PDF_UPLOAD_MAX_BYTES)
         _validate_pdf_bytes(content)
-        pdf_path.write_bytes(content)
+        await asyncio.to_thread(_write_kb_pdf, filename, content)
         await _admin_audit(db, admin, request, "admin.kb.upload_file", f"filename={filename} size={len(content)}")
         return {"ok": True, "filename": filename, "size": len(content)}
     except HTTPException:
