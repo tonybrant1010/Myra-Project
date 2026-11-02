@@ -1,13 +1,13 @@
 # Myra Frontend Client
 
-Ez a Myra mentálhigiénés önismereti alkalmazás webes és mobil frontendje, amely React Native és Expo használatával készült, és Vercelre van optimalizálva.
+Ez a Myra önismereti alkalmazás Expo / React Native frontendje. A webes exportot a saját szerveren Caddy szolgálja ki a `/srv/frontend/dist` könyvtárból.
 
 ## Fő Technológiai Stack
 
-- **Expo (SDK 51)** és **React Native Web**: Lehetővé teszi az univerzális kódmegosztást és a reszponzív, glassmorphism alapú webes felületet.
+- **Expo (SDK 54)** és **React Native Web**: közös webes és mobil forráskód.
 - **Expo Router**: Fájlrendszer-alapú navigáció és útvonalkezelés.
 - **TypeScript**: Tiszta, típusbiztos kódbázis.
-- **Vite/Vercel**: Gyors betöltést biztosító frontend hosztolási és útvonal-átirányítási struktúra.
+- **Metro / statikus export / Caddy**: a `/api` útvonalat a szerver Caddy-konfigurációja továbbítja a backendnek.
 
 ## Mappa Struktúra
 
@@ -15,7 +15,7 @@ Ez a Myra mentálhigiénés önismereti alkalmazás webes és mobil frontendje, 
 - `/src/components`: Közös UI komponensek (pl. `SideMenu.tsx`, `TopBar.tsx`, `PasswordInput.tsx`).
 - `/src/auth`: Bejelentkezési folyamatok és munkamenet-érvényesség kezelése (`AuthContext.tsx`).
 - `/assets`: Képek, betűtípusok és dizájn-assetek.
-- `/scripts`: Gyártási folyamatokat segítő scriptek (pl. asset patcher Vercel-hez).
+- `/scripts`: ellenőrzött release-build, statikus erőforrások és SSH-alapú telepítés.
 
 ## Fejlesztési Folyamat
 
@@ -23,7 +23,7 @@ Ez a Myra mentálhigiénés önismereti alkalmazás webes és mobil frontendje, 
 
 1. Telepítsd a függőségeket:
    ```bash
-   yarn install
+   npm ci
    ```
 
 2. Állítsd be a backend elérését környezeti változóban, majd indítsd el a dev szervert:
@@ -35,14 +35,20 @@ Ez a Myra mentálhigiénés önismereti alkalmazás webes és mobil frontendje, 
 
    `EXPO_PUBLIC_CONTROLLER_NAME`: az adatkezelő neve, ami a GDPR-szövegben jelenik meg.
    A repóban szándékosan placeholder szerepel (személyes adat nem kerül a forrásba);
-   **éles buildnél kötelező kitölteni**, különben a felületen a placeholder látszik.
+   **Release-buildnél kötelező kitölteni**: hiányzó vagy helykitöltő értékkel a build leáll.
 
-## Vercel Élesítés
+## Release és telepítés
 
-A projekt élesítése a `frontend` mappából futtatott alábbi paranccsal történik:
+A helyi build a `frontend` könyvtárban készíthető el, éles szerverkapcsolat nélkül:
 ```bash
-npm run deploy
+npm run release:web
 ```
-Ez a parancs lefuttatja a webes exportot (`npx expo export --platform web`), alkalmazza a szükséges javításokat az asseteken a `scripts/patch-dist.js` segítségével, majd feltölti a buildet a Vercel-re.
+Kötelező környezet: `EXPO_PUBLIC_CONTROLLER_NAME`; saját szerveren az
+`EXPO_PUBLIC_BACKEND_URL` üres (azonos eredetű `/api`). Külső backendcímet a
+release csak HTTPS-sel fogad el. A build `dist/build-info.json` fájlt is készít.
 
-Az API hívások átirányítását a backend felé a `vercel.json` rewrite szabályai kezelik.
+Az `npm run deploy` már szerverre ír: ellenőrzött release-t épít, majd az
+`MYRA_DEPLOY_HOST` SSH-célra publikál. A cél alapértelmezése `/srv/frontend/dist`,
+felülírása `MYRA_DEPLOY_DIR`. A telepítő csak érvényes build-információval indul,
+és az `ops/publish_frontend.py` segítségével cseréli a frontend könyvtárát.
+Az API-továbbítást a szerver Caddyfile-ja kezeli; Vercel-konfiguráció nem része a telepítésnek.

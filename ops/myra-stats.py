@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
-"""Myra forgalmi statisztika osszesito.
-
-A Caddy hozzaferesi naplojat (JSON sorok) dolgozza fel NOVEKVO modon: fajlonkent
-eltarolja a mar feldolgozott byte-offszetet, ezert percenkent lefutva is olcso.
-
-Kimeneet: backend/data/statisztika.json  (ezt szolgalja ki a backend /api/admin/stats)
-
-Ket kategoria:
-  - frontend: minden nem /api/ alatti keres (statikus fajlok)
-  - backend:  /api/ alatti keres
-Es harom kimenetel:
-  - sikeres     : 2xx/3xx
-  - elutasitott : 4xx (beleertve 401/403/429)
-  - szerverhIBA : 5xx
-"""
 import json
 import os
 import re
 import subprocess
 import sys
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -33,17 +17,23 @@ NAPI_MEGTART = 14
 TOP_DB = 10
 
 
-def _nap(ts: str) -> str:
-    """Caddy idobelyeg (ISO 8601, UTC) -> napi kulcs HHHH-NN-HH."""
+def _timestamp(ts):
     try:
-        return datetime.fromisoformat(ts.replace("Z", "+00:00")).strftime("%Y-%m-%d")
+        return datetime.fromtimestamp(float(ts), tz=timezone.utc)
+    except (ValueError, TypeError):
+        return datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+
+
+def _nap(ts: str) -> str:
+    try:
+        return _timestamp(ts).strftime("%Y-%m-%d")
     except Exception:
         return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
 def _ora(ts: str) -> str:
     try:
-        return datetime.fromisoformat(ts.replace("Z", "+00:00")).strftime("%Y-%m-%dT%H")
+        return _timestamp(ts).strftime("%Y-%m-%dT%H")
     except Exception:
         return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H")
 
@@ -76,6 +66,8 @@ def _feldolgoz() -> dict:
         return {"hiba": f"nincs naplokonyvtar: {LOG_DIR}"}
 
     elerheto = sorted(p for p in LOG_DIR.iterdir() if NAPLO_MINTA.match(p.name))
+    identity_offsets = {value["identity"]: int(value.get("offset", 0))
+                        for value in fajlok.values() if isinstance(value, dict) and "identity" in value}
 
     for nev in list(fajlok):
         if nev not in {p.name for p in elerheto}:
@@ -84,22 +76,31 @@ def _feldolgoz() -> dict:
     feldolgozott = 0
     for ut in elerheto:
         try:
-            meret = ut.stat().st_size
+            file_stat = ut.stat()
+            meret = file_stat.st_size
         except OSError:
             continue
-        offszet = int(fajlok.get(ut.name, 0))
+        previous = fajlok.get(ut.name, {})
+        identity = f"{file_stat.st_dev}:{file_stat.st_ino}"
+        if isinstance(previous, dict):
+            offszet = (int(previous.get("offset", 0)) if previous.get("identity") == identity
+                       else identity_offsets.get(identity, 0))
+        else:
+            # Preserve the old cursor once while upgrading the state format.
+            offszet = int(previous)
 
         if offszet > meret:
             offszet = 0
         if offszet == meret:
+            fajlok[ut.name] = {"identity": identity, "offset": offszet}
             continue
         try:
-            with ut.open("r", encoding="utf-8", errors="replace") as fh:
+            with ut.open("rb") as fh:
                 fh.seek(offszet)
                 for sor in fh:
-                    if not sor.endswith("\n"):
+                    if not sor.endswith(b"\n"):
                         break
-                    offszet += len(sor.encode("utf-8", errors="replace"))
+                    offszet += len(sor)
                     feldolgozott += 1
                     try:
                         esemeny = json.loads(sor)
@@ -108,7 +109,7 @@ def _feldolgoz() -> dict:
                     _szamol(esemeny, napok, orak)
         except OSError:
             continue
-        fajlok[ut.name] = offszet
+        fajlok[ut.name] = {"identity": identity, "offset": offszet}
 
     _forgat(napok, orak)
     return {"fajlok": fajlok, "napok": napok, "orak": orak,
@@ -167,8 +168,6 @@ def _top(d: dict, darab: int = TOP_DB) -> list:
 
 
 def _fail2ban() -> dict:
-    """A bortonok es a jelenleg tiltott IP-k szama. Root nelkul csak olvashato
-    naplobol/parancsbol; ha nem elerheto, ures marad (nem hiba)."""
     ki = {}
     try:
         lista = subprocess.run(["fail2ban-client", "status"], capture_output=True,

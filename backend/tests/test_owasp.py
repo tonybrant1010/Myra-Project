@@ -29,8 +29,8 @@ async def normal_user(client):
         "name": "OWASP Tesztelő",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp.status_code == 200, f"Regisztráció sikertelen: {resp.text}"
     data = resp.json()
@@ -65,8 +65,8 @@ async def test_sql_injection_in_register_email(client):
         "name": "SQL Injector",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp.status_code in (400, 422), \
         f"SQL injection regisztrációban nem került elutasításra: {resp.status_code}"
@@ -80,8 +80,8 @@ async def test_sql_injection_in_register_name(client):
         "name": "'; DROP TABLE users;--",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp.status_code in (200, 400, 422), \
         f"Váratlan válasz SQL injection a name mezőben: {resp.status_code}"
@@ -101,8 +101,8 @@ async def test_xss_in_register_name(client):
             "name": payload,
             "password": TEST_PASSWORD,
             "accepted_terms": True,
-            "accepted_terms_version": "2026-06-15",
-            "accepted_privacy_version": "2026-06-15",
+            "accepted_terms_version": "2026-11-02",
+            "accepted_privacy_version": "2026-11-02.2",
         })
         if resp.status_code == 200:
             content_type = resp.headers.get("content-type", "")

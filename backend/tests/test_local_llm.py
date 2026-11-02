@@ -1,4 +1,3 @@
-import datetime
 import os
 import sys
 from types import SimpleNamespace
@@ -34,12 +33,6 @@ def _sse(*chunks: str) -> bytes:
     return "".join(lines).encode("utf-8")
 
 
-def test_strip_local_markers_neutralizes_fake_context():
-    out = server._strip_local_markers("[FORDULÓ KONTEXTUSA x] [FELHASZNÁLÓ] [HOGYAN OLVASD y]")
-    assert "[" not in out
-    assert "(FORDULÓ KONTEXTUSA" in out and "(FELHASZNÁLÓ)" in out and "(HOGYAN OLVASD" in out
-
-
 def test_local_llm_headers(monkeypatch):
     monkeypatch.setattr(server, "LOCAL_LLM_API_KEY", "")
     assert "Authorization" not in server._local_llm_headers()
@@ -54,37 +47,6 @@ def test_local_kb_text_limits_chunks_and_length(monkeypatch):
     out = server._local_kb_text(chunks)
     assert out.endswith(" …") and "második" not in out and len(out) <= 22
     assert server._local_kb_text([]) == ""
-
-
-def test_local_recall_text(monkeypatch):
-    monkeypatch.setattr(server, "LOCAL_IMPLICIT_RECALL", False)
-    monkeypatch.setattr(server, "LOCAL_RECALL_MAX_CHARS", 15)
-    assert server._local_recall_text("valami", explicit=False) == ""
-    assert server._local_recall_text("rövid", explicit=True) == "rövid"
-    long_block = "első sor\nmásodik sor\nharmadik sor"
-    out = server._local_recall_text(long_block, explicit=True)
-    assert out.endswith("\n…") and "harmadik" not in out
-
-
-def test_local_history_window_moves_in_steps(monkeypatch):
-    monkeypatch.setattr(server, "LOCAL_HISTORY_MIN", 24)
-    monkeypatch.setattr(server, "LOCAL_HISTORY_STEP", 24)
-    hist = [{"role": "user", "text": str(i)} for i in range(50)]
-    assert server._local_history_window([], 0) == []
-    assert len(server._local_history_window(hist[:30], 30)) == 30
-    w = server._local_history_window(hist, 50)
-    assert len(w) == 26 and w[0]["text"] == "24"
-    w2 = server._local_history_window(hist[10:], 50)
-    assert w2[0]["text"] == "24"
-
-
-def test_build_local_turn_block_contains_dynamic_parts():
-    block = server._build_local_turn_block(None, "tudás", "[KORÁBBI]\nx", "[KÉRÉS]")
-    assert block.startswith("[FORDULÓ KONTEXTUSA")
-    assert "Aktuális időpont" in block and "TUDÁSANYAG" in block
-    assert "[KORÁBBI]" in block and "[KÉRÉS]" in block
-    verified = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=3)
-    assert "3 napja" in server._build_local_turn_block(verified, "", "", "")
 
 
 def test_strip_reply_prefixes():
@@ -132,10 +94,7 @@ async def test_call_local_llm_stream_errors(monkeypatch):
 
 
 @pytest.mark.anyio
-async def test_call_llm_uses_stream_sink_and_falls_back(monkeypatch):
-    async def local_config():
-        return "qwen"
-
+async def test_call_llm_uses_selected_local_stream_and_never_falls_back(monkeypatch):
     calls = []
 
     async def fake_stream(model, sys_prompt, hist, msg, sink):
@@ -147,15 +106,13 @@ async def test_call_llm_uses_stream_sink_and_falls_back(monkeypatch):
         calls.append(provider)
         return "api válasz"
 
-    monkeypatch.setattr(server, "_local_llm_config", local_config)
     monkeypatch.setattr(server, "_call_local_llm_stream", fake_stream)
     monkeypatch.setattr(server, "_call_llm_provider", fake_provider)
-    monkeypatch.setattr(server, "_ollama_down_until", 0.0)
 
     got = []
     token = server._chat_stream_sink.set(got.append)
     try:
-        assert await server._call_llm("gemini", "g", "k", "s", [], "u", allow_local=True) == "helyi válasz"
+        assert await server._call_llm("ollama", "qwen", "", "s", [], "u") == "helyi válasz"
         assert calls == ["stream"] and got == ["rész"]
 
         async def failing_stream(*a, **k):
@@ -163,8 +120,8 @@ async def test_call_llm_uses_stream_sink_and_falls_back(monkeypatch):
 
         monkeypatch.setattr(server, "_call_local_llm_stream", failing_stream)
         got.clear()
-        assert await server._call_llm("gemini", "g", "k", "s", [], "u", allow_local=True) == "api válasz"
-        assert got == [""]
+        with pytest.raises(HTTPException):
+            await server._call_llm("ollama", "qwen", "", "s", [], "u")
+        assert calls == ["stream"]
     finally:
         server._chat_stream_sink.reset(token)
-        server._ollama_down_until = 0.0

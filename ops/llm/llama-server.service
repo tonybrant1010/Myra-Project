@@ -1,13 +1,25 @@
-﻿[Unit]
-Description=llama.cpp server - router mod (Myra)
-After=network-online.target
+[Unit]
+Description=llama.cpp server – Myra helyi modell (router mód)
+Documentation=https://github.com/ggml-org/llama.cpp
+After=network-online.target docker.service
+Wants=network-online.target docker.service
 
 [Service]
-User=myra-llm
-EnvironmentFile=/etc/myra/llama-server.env
-ExecStart=${LLAMA_SERVER_BIN} --models-preset ${LLAMA_MODELS_PRESET} --models-max ${LLAMA_MODELS_MAX} --host ${LLAMA_HOST} --port ${LLAMA_PORT} --api-key ${LLAMA_API_KEY}
+User=<user>
+Group=<user>
+EnvironmentFile=/etc/llama-server.env
+
+ExecStart=/home/<user>/llama.cpp/build/bin/llama-server \
+    --models-preset /home/<user>/llm/models.ini \
+    --models-max 1 \
+    --cache-reuse 256 \
+    --host 127.0.0.1,172.18.0.1 \
+    --port 11434
+
 Restart=always
 RestartSec=5
+TimeoutStopSec=30
+OOMScoreAdjust=-500
 
 [Install]
 WantedBy=multi-user.target

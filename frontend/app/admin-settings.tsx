@@ -1,7 +1,7 @@
+import { confirmAction } from "@/src/utils/dialog";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -37,7 +37,6 @@ type Settings = {
   ollama_reachable: boolean;
   ollama_models: { name: string; size_gb: number }[];
   ollama_base_url: string;
-  local_llm_fallback_active: boolean;
 };
 
 type SecurityEvent = {
@@ -279,20 +278,11 @@ export default function AdminSettingsScreen() {
   const releaseQuarantine = () =>
     securityAction("/api/admin/security/release", { reason: "" }, "Karanten feloldva, a platform ujra elerheto.");
 
-  const manualQuarantine = () =>
-    Alert.alert(
-      "Karantén bekapcsolása",
-      "A platform minden nem-admin kérésre 503-at fog adni, amíg fel nem oldod. Te admin jogon továbbra is be tudsz lépni.",
-      [
-        { text: "Mégse", style: "cancel" },
-        {
-          text: "KARANTÉN",
-          style: "destructive",
-          onPress: () =>
-            securityAction("/api/admin/security/quarantine", { reason: "kézi karantén" }, "Karantén bekapcsolva."),
-        },
-      ],
-    );
+  const manualQuarantine = async () => {
+    if (await confirmAction("Karantén bekapcsolása", "A platform minden nem-admin kérésre 503-at fog adni, amíg fel nem oldod. Te admin jogon továbbra is be tudsz lépni.", "KARANTÉN")) {
+      await securityAction("/api/admin/security/quarantine", { reason: "kézi karantén" }, "Karantén bekapcsolva.");
+    }
+  };
 
   const clearEvents = () =>
     securityAction("/api/admin/security/events/clear", {}, "Eseménylista ürítve.");
@@ -412,40 +402,22 @@ export default function AdminSettingsScreen() {
   };
 
   const dockerComposeDown = async () => {
-    Alert.alert(
-      "Backend leállítása",
-      "Biztosan le akarod állítani a backendet? Csak a backend konténer áll le — a frontend (Caddy) elérhető marad, de az API nem válaszol, amíg a konténer újra nem indul. Újraindítás: docker compose up -d backend.",
-      [
-        { text: "Mégse", style: "cancel" },
-        {
-          text: "LEÁLLÍTÁS",
-          style: "destructive",
-          onPress: async () => {
-            const currentPassword = requireEmergencyPassword();
-            if (!currentPassword) return;
-            setDownBusy(true);
-            setMsg(null);
-            setErr(null);
-            try {
-              const r = await authedFetch(token, "/api/admin/down", {
-                method: "POST",
-                body: JSON.stringify({ current_password: currentPassword }),
-              });
-              if (r.ok) {
-                setEmergencyPassword("");
-                setMsg("Backend leállítás elindítva. Az API néhány másodperc múlva nem válaszol; a frontend elérhető marad. Újraindítás: docker compose up -d backend.");
-              } else {
-                setErr("Leállítás sikertelen.");
-              }
-            } catch (e: any) {
-              setErr(e.message || "Hiba (a backend valószínűleg már leállt).");
-            } finally {
-              setDownBusy(false);
-            }
-          }
-        }
-      ]
-    );
+    const currentPassword = requireEmergencyPassword();
+    if (!currentPassword) return;
+    if (!await confirmAction("Backend leállítása", "Biztosan leállítod a backendet? A frontend elérhető marad, de az API nem válaszol a konténer újraindításáig. Újraindítás: docker compose up -d backend.", "LEÁLLÍTÁS")) return;
+    setDownBusy(true);
+    setMsg(null);
+    setErr(null);
+    try {
+      const r = await authedFetch(token, "/api/admin/down", {
+        method: "POST", body: JSON.stringify({ current_password: currentPassword }),
+      });
+      if (r.ok) {
+        setEmergencyPassword("");
+        setMsg("Backend leállítás elindítva. Újraindítás: docker compose up -d backend.");
+      } else setErr("Leállítás sikertelen.");
+    } catch { setErr("A backend nem érhető el. Ellenőrizd az állapotát a szerveren."); }
+    finally { setDownBusy(false); }
   };
 
   if (!user?.is_admin) {
@@ -492,8 +464,8 @@ export default function AdminSettingsScreen() {
                   <View style={{ flex: 1, paddingRight: 12 }}>
                     <T variant="label" color={theme.textOnDark}>Helyi modell (saját szerver)</T>
                     <T variant="small" color="rgba(247,251,255,0.6)" style={{ marginTop: 2, lineHeight: 18 }}>
-                      Bekapcsolva a Myra először a saját gépen futó modellt kérdezi. Ha a gép nem
-                      érhető el vagy hibázik, automatikusan a lent beállított szolgáltató válaszol.
+                      Bekapcsolva a chatbot a saját szerveren futó modellt használja.
+                      Hiba esetén sem vált külső szolgáltatóra. Kikapcsolva az alább kiválasztott szolgáltató válaszol.
                     </T>
                   </View>
                   <Switch
@@ -513,7 +485,6 @@ export default function AdminSettingsScreen() {
                   {data?.ollama_reachable
                     ? `Szerver elérhető (${data.ollama_models.length} modell)`
                     : `Szerver nem érhető el (${data?.ollama_base_url || "-"})`}
-                  {data?.local_llm_fallback_active ? " · most a tartalék szolgáltató válaszol" : ""}
                 </T>
                 {data?.ollama_models?.length ? (
                   <View style={styles.dropList}>
@@ -544,7 +515,7 @@ export default function AdminSettingsScreen() {
                   <LocalSamplingCard token={token} initial={data as any} />
                 </View>
 
-                <FieldLabel text="LLM Szolgáltató (tartalék, ha a helyi modell ki van kapcsolva vagy nem elérhető)" />
+                <FieldLabel text="LLM Szolgáltató (csak kikapcsolt helyi modell mellett; bekapcsolt helyi modellnél nincs API-tartalék)" />
                 <View style={styles.providerRow}>
                   {PROVIDERS.map((p) => (
                     <TouchableOpacity
@@ -662,10 +633,6 @@ export default function AdminSettingsScreen() {
                   {saving ? <ActivityIndicator color={theme.white} /> : <T variant="title" color={theme.white}>Beállítások mentése</T>}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.outlineBtn} onPress={() => downloadBackup(token, setErr)} testID="backup-button">
-                  <Ionicons name="download-outline" size={16} color={theme.accent} style={{ marginRight: 6 }} />
-                  <T variant="label" color={theme.accent}>Adatbázis mentés letöltése</T>
-                </TouchableOpacity>
               </Section>
 
 
@@ -1018,6 +985,18 @@ export default function AdminSettingsScreen() {
                   testID="sos-admin-password"
                 />
 
+                <TouchableOpacity
+                  style={styles.outlineBtn}
+                  onPress={() => {
+                    const currentPassword = requireEmergencyPassword();
+                    if (currentPassword) downloadBackup(token, currentPassword, setErr);
+                  }}
+                  testID="backup-button"
+                >
+                  <Ionicons name="download-outline" size={16} color={theme.accent} style={{ marginRight: 6 }} />
+                  <T variant="label" color={theme.accent}>Adatbázis mentés letöltése</T>
+                </TouchableOpacity>
+
 
                 <TouchableOpacity
                   style={[styles.emergencyActionBtn, maintenance && { backgroundColor: theme.warm }]}
@@ -1171,12 +1150,14 @@ function providerHelp(provider: Provider) {
   return "aistudio.google.com/apikey";
 }
 
-function downloadBackup(token: string | null, setErr: (message: string) => void) {
+function downloadBackup(token: string | null, currentPassword: string, setErr: (message: string) => void) {
   if (Platform.OS !== "web") return;
   fetch(apiUrl("/api/admin/backup"), {
+    method: "POST",
     cache: "no-store",
     credentials: "omit",
-    headers: { Authorization: `Bearer ${token || ""}` },
+    headers: { Authorization: `Bearer ${token || ""}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ current_password: currentPassword }),
   })
     .then(async (r) => {
       if (!r.ok) {

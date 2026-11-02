@@ -97,5 +97,3 @@ export function T({ variant = "body", color, align, style, ...rest }: Props) {
     />
   );
 }
-
-export const ty = variantStyles;

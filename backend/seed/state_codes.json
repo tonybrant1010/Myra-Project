@@ -1,0 +1,2562 @@
+[
+  {
+    "code": "1111",
+    "a": 1,
+    "p": 1,
+    "h": 1,
+    "c": 1,
+    "title": "Alulreflektált labilis állapot",
+    "severity": "ELEVATED",
+    "profile": "Alulreflektált labilis állapot (ELEVATED)"
+  },
+  {
+    "code": "1112",
+    "a": 1,
+    "p": 1,
+    "h": 1,
+    "c": 2,
+    "title": "Enyhe szomatizáció gyenge kontrollal",
+    "severity": "ELEVATED",
+    "profile": "Enyhe szomatizáció gyenge kontrollal (ELEVATED)"
+  },
+  {
+    "code": "1113",
+    "a": 1,
+    "p": 1,
+    "h": 1,
+    "c": 3,
+    "title": "Szomatizációs zavar gyanú",
+    "severity": "ELEVATED",
+    "profile": "Szomatizációs zavar gyanú (ELEVATED)"
+  },
+  {
+    "code": "1114",
+    "a": 1,
+    "p": 1,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció rejtett okkal",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció rejtett okkal (CRITICAL)"
+  },
+  {
+    "code": "1121",
+    "a": 1,
+    "p": 1,
+    "h": 2,
+    "c": 1,
+    "title": "Enyhe stressz gyenge szabályozással",
+    "severity": "ELEVATED",
+    "profile": "Enyhe stressz gyenge szabályozással (ELEVATED)"
+  },
+  {
+    "code": "1122",
+    "a": 1,
+    "p": 1,
+    "h": 2,
+    "c": 2,
+    "title": "Labilis egyensúly",
+    "severity": "ELEVATED",
+    "profile": "Labilis egyensúly (ELEVATED)"
+  },
+  {
+    "code": "1123",
+    "a": 1,
+    "p": 1,
+    "h": 2,
+    "c": 3,
+    "title": "Stressz alapú szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Stressz alapú szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "1124",
+    "a": 1,
+    "p": 1,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "1131",
+    "a": 1,
+    "p": 1,
+    "h": 3,
+    "c": 1,
+    "title": "Rejtett stresszprofil",
+    "severity": "ELEVATED",
+    "profile": "Rejtett stresszprofil (ELEVATED)"
+  },
+  {
+    "code": "1132",
+    "a": 1,
+    "p": 1,
+    "h": 3,
+    "c": 2,
+    "title": "Kezdődő burnout",
+    "severity": "ELEVATED",
+    "profile": "Kezdődő burnout (ELEVATED)"
+  },
+  {
+    "code": "1133",
+    "a": 1,
+    "p": 1,
+    "h": 3,
+    "c": 3,
+    "title": "Pszichoszomatikus terheltség",
+    "severity": "ELEVATED",
+    "profile": "Pszichoszomatikus terheltség (ELEVATED)"
+  },
+  {
+    "code": "1134",
+    "a": 1,
+    "p": 1,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatikus állapot",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatikus állapot (CRITICAL)"
+  },
+  {
+    "code": "1141",
+    "a": 1,
+    "p": 1,
+    "h": 4,
+    "c": 1,
+    "title": "Akut stresszreakció",
+    "severity": "CRITICAL",
+    "profile": "Akut stresszreakció (CRITICAL)"
+  },
+  {
+    "code": "1142",
+    "a": 1,
+    "p": 1,
+    "h": 4,
+    "c": 2,
+    "title": "Krónikus stressz profil",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz profil (CRITICAL)"
+  },
+  {
+    "code": "1143",
+    "a": 1,
+    "p": 1,
+    "h": 4,
+    "c": 3,
+    "title": "Összeomlás közeli állapot",
+    "severity": "CRITICAL",
+    "profile": "Összeomlás közeli állapot (CRITICAL)"
+  },
+  {
+    "code": "1144",
+    "a": 1,
+    "p": 1,
+    "h": 4,
+    "c": 4,
+    "title": "Teljes rendszerösszeomlás",
+    "severity": "CRITICAL",
+    "profile": "Teljes rendszerösszeomlás (CRITICAL)"
+  },
+  {
+    "code": "1211",
+    "a": 1,
+    "p": 2,
+    "h": 1,
+    "c": 1,
+    "title": "Enyhén csökkent szabályozás",
+    "severity": "NORMAL",
+    "profile": "Enyhén csökkent szabályozás (NORMAL)"
+  },
+  {
+    "code": "1212",
+    "a": 1,
+    "p": 2,
+    "h": 1,
+    "c": 2,
+    "title": "Enyhe testi tünetek",
+    "severity": "NORMAL",
+    "profile": "Enyhe testi tünetek (NORMAL)"
+  },
+  {
+    "code": "1213",
+    "a": 1,
+    "p": 2,
+    "h": 1,
+    "c": 3,
+    "title": "Szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "1214",
+    "a": 1,
+    "p": 2,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "1221",
+    "a": 1,
+    "p": 2,
+    "h": 2,
+    "c": 1,
+    "title": "Átlagos állapot",
+    "severity": "NORMAL",
+    "profile": "Átlagos állapot (NORMAL)"
+  },
+  {
+    "code": "1222",
+    "a": 1,
+    "p": 2,
+    "h": 2,
+    "c": 2,
+    "title": "Átlagos terheltség",
+    "severity": "NORMAL",
+    "profile": "Átlagos terheltség (NORMAL)"
+  },
+  {
+    "code": "1223",
+    "a": 1,
+    "p": 2,
+    "h": 2,
+    "c": 3,
+    "title": "Testi tünetek stresszel",
+    "severity": "ELEVATED",
+    "profile": "Testi tünetek stresszel (ELEVATED)"
+  },
+  {
+    "code": "1224",
+    "a": 1,
+    "p": 2,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "1231",
+    "a": 1,
+    "p": 2,
+    "h": 3,
+    "c": 1,
+    "title": "Rejtett stressz",
+    "severity": "ELEVATED",
+    "profile": "Rejtett stressz (ELEVATED)"
+  },
+  {
+    "code": "1232",
+    "a": 1,
+    "p": 2,
+    "h": 3,
+    "c": 2,
+    "title": "Krónikus stressz",
+    "severity": "ELEVATED",
+    "profile": "Krónikus stressz (ELEVATED)"
+  },
+  {
+    "code": "1233",
+    "a": 1,
+    "p": 2,
+    "h": 3,
+    "c": 3,
+    "title": "Túlterhelt rendszer",
+    "severity": "ELEVATED",
+    "profile": "Túlterhelt rendszer (ELEVATED)"
+  },
+  {
+    "code": "1234",
+    "a": 1,
+    "p": 2,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "1241",
+    "a": 1,
+    "p": 2,
+    "h": 4,
+    "c": 1,
+    "title": "Magas funkciójú burnout",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú burnout (CRITICAL)"
+  },
+  {
+    "code": "1242",
+    "a": 1,
+    "p": 2,
+    "h": 4,
+    "c": 2,
+    "title": "Kritikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Kritikus stressz (CRITICAL)"
+  },
+  {
+    "code": "1243",
+    "a": 1,
+    "p": 2,
+    "h": 4,
+    "c": 3,
+    "title": "Kritikus stressz és szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Kritikus stressz és szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "1244",
+    "a": 1,
+    "p": 2,
+    "h": 4,
+    "c": 4,
+    "title": "Összeomlás",
+    "severity": "CRITICAL",
+    "profile": "Összeomlás (CRITICAL)"
+  },
+  {
+    "code": "1311",
+    "a": 1,
+    "p": 3,
+    "h": 1,
+    "c": 1,
+    "title": "Stabil nyugodt állapot",
+    "severity": "LOW",
+    "profile": "Stabil nyugodt állapot (LOW)"
+  },
+  {
+    "code": "1312",
+    "a": 1,
+    "p": 3,
+    "h": 1,
+    "c": 2,
+    "title": "Enyhe testi tünetek",
+    "severity": "NORMAL",
+    "profile": "Enyhe testi tünetek (NORMAL)"
+  },
+  {
+    "code": "1313",
+    "a": 1,
+    "p": 3,
+    "h": 1,
+    "c": 3,
+    "title": "Fokozott testi tünetek",
+    "severity": "ELEVATED",
+    "profile": "Fokozott testi tünetek (ELEVATED)"
+  },
+  {
+    "code": "1314",
+    "a": 1,
+    "p": 3,
+    "h": 1,
+    "c": 4,
+    "title": "Szomatizációs zavar",
+    "severity": "CRITICAL",
+    "profile": "Szomatizációs zavar (CRITICAL)"
+  },
+  {
+    "code": "1321",
+    "a": 1,
+    "p": 3,
+    "h": 2,
+    "c": 1,
+    "title": "Normál adaptáció",
+    "severity": "NORMAL",
+    "profile": "Normál adaptáció (NORMAL)"
+  },
+  {
+    "code": "1322",
+    "a": 1,
+    "p": 3,
+    "h": 2,
+    "c": 2,
+    "title": "Stabil egyensúly",
+    "severity": "NORMAL",
+    "profile": "Stabil egyensúly (NORMAL)"
+  },
+  {
+    "code": "1323",
+    "a": 1,
+    "p": 3,
+    "h": 2,
+    "c": 3,
+    "title": "Testi tünetekben megjelenő feszültség",
+    "severity": "ELEVATED",
+    "profile": "Testi tünetekben megjelenő feszültség (ELEVATED)"
+  },
+  {
+    "code": "1324",
+    "a": 1,
+    "p": 3,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "1331",
+    "a": 1,
+    "p": 3,
+    "h": 3,
+    "c": 1,
+    "title": "Rejtett krónikus stressz",
+    "severity": "ELEVATED",
+    "profile": "Rejtett krónikus stressz (ELEVATED)"
+  },
+  {
+    "code": "1332",
+    "a": 1,
+    "p": 3,
+    "h": 3,
+    "c": 2,
+    "title": "Kompenzált stressz",
+    "severity": "NORMAL",
+    "profile": "Kompenzált stressz (NORMAL)"
+  },
+  {
+    "code": "1333",
+    "a": 1,
+    "p": 3,
+    "h": 3,
+    "c": 3,
+    "title": "Túlterhelt, de rugalmas",
+    "severity": "ELEVATED",
+    "profile": "Túlterhelt, de rugalmas (ELEVATED)"
+  },
+  {
+    "code": "1334",
+    "a": 1,
+    "p": 3,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "1341",
+    "a": 1,
+    "p": 3,
+    "h": 4,
+    "c": 1,
+    "title": "Kompenzált burnout",
+    "severity": "CRITICAL",
+    "profile": "Kompenzált burnout (CRITICAL)"
+  },
+  {
+    "code": "1342",
+    "a": 1,
+    "p": 3,
+    "h": 4,
+    "c": 2,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "1343",
+    "a": 1,
+    "p": 3,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz szomatizációval",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz szomatizációval (CRITICAL)"
+  },
+  {
+    "code": "1344",
+    "a": 1,
+    "p": 3,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatikus terhelés",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatikus terhelés (CRITICAL)"
+  },
+  {
+    "code": "1411",
+    "a": 1,
+    "p": 4,
+    "h": 1,
+    "c": 1,
+    "title": "Kiváló stressztűrés",
+    "severity": "LOW",
+    "profile": "Kiváló stressztűrés (LOW)"
+  },
+  {
+    "code": "1412",
+    "a": 1,
+    "p": 4,
+    "h": 1,
+    "c": 2,
+    "title": "Jó szabályozás, enyhe tünetek",
+    "severity": "LOW",
+    "profile": "Jó szabályozás, enyhe tünetek (LOW)"
+  },
+  {
+    "code": "1413",
+    "a": 1,
+    "p": 4,
+    "h": 1,
+    "c": 3,
+    "title": "Jó szabályozás, fokozott tünetek",
+    "severity": "ELEVATED",
+    "profile": "Jó szabályozás, fokozott tünetek (ELEVATED)"
+  },
+  {
+    "code": "1414",
+    "a": 1,
+    "p": 4,
+    "h": 1,
+    "c": 4,
+    "title": "Erős kontroll melletti szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Erős kontroll melletti szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "1421",
+    "a": 1,
+    "p": 4,
+    "h": 2,
+    "c": 1,
+    "title": "Jó szabályozás",
+    "severity": "LOW",
+    "profile": "Jó szabályozás (LOW)"
+  },
+  {
+    "code": "1422",
+    "a": 1,
+    "p": 4,
+    "h": 2,
+    "c": 2,
+    "title": "Stabil, terhelhető",
+    "severity": "LOW",
+    "profile": "Stabil, terhelhető (LOW)"
+  },
+  {
+    "code": "1423",
+    "a": 1,
+    "p": 4,
+    "h": 2,
+    "c": 3,
+    "title": "Jó szabályozás, testi tünetek",
+    "severity": "ELEVATED",
+    "profile": "Jó szabályozás, testi tünetek (ELEVATED)"
+  },
+  {
+    "code": "1424",
+    "a": 1,
+    "p": 4,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "1431",
+    "a": 1,
+    "p": 4,
+    "h": 3,
+    "c": 1,
+    "title": "Feszített egyensúly",
+    "severity": "NORMAL",
+    "profile": "Feszített egyensúly (NORMAL)"
+  },
+  {
+    "code": "1432",
+    "a": 1,
+    "p": 4,
+    "h": 3,
+    "c": 2,
+    "title": "Kompenzált túlfeszülés",
+    "severity": "NORMAL",
+    "profile": "Kompenzált túlfeszülés (NORMAL)"
+  },
+  {
+    "code": "1433",
+    "a": 1,
+    "p": 4,
+    "h": 3,
+    "c": 3,
+    "title": "Magas funkciójú túlterheltség",
+    "severity": "ELEVATED",
+    "profile": "Magas funkciójú túlterheltség (ELEVATED)"
+  },
+  {
+    "code": "1434",
+    "a": 1,
+    "p": 4,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "1441",
+    "a": 1,
+    "p": 4,
+    "h": 4,
+    "c": 1,
+    "title": "Magas funkciójú burnout",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú burnout (CRITICAL)"
+  },
+  {
+    "code": "1442",
+    "a": 1,
+    "p": 4,
+    "h": 4,
+    "c": 2,
+    "title": "Túlkontrollált krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Túlkontrollált krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "1443",
+    "a": 1,
+    "p": 4,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "1444",
+    "a": 1,
+    "p": 4,
+    "h": 4,
+    "c": 4,
+    "title": "Magas funkciójú összeomlás",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú összeomlás (CRITICAL)"
+  },
+  {
+    "code": "2111",
+    "a": 2,
+    "p": 1,
+    "h": 1,
+    "c": 1,
+    "title": "Szorongásos készenlét",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos készenlét (ELEVATED)"
+  },
+  {
+    "code": "2112",
+    "a": 2,
+    "p": 1,
+    "h": 1,
+    "c": 2,
+    "title": "Szorongásos szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "2113",
+    "a": 2,
+    "p": 1,
+    "h": 1,
+    "c": 3,
+    "title": "Erős szorongásos tünetek",
+    "severity": "ELEVATED",
+    "profile": "Erős szorongásos tünetek (ELEVATED)"
+  },
+  {
+    "code": "2114",
+    "a": 2,
+    "p": 1,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "2121",
+    "a": 2,
+    "p": 1,
+    "h": 2,
+    "c": 1,
+    "title": "Általános szorongás",
+    "severity": "ELEVATED",
+    "profile": "Általános szorongás (ELEVATED)"
+  },
+  {
+    "code": "2122",
+    "a": 2,
+    "p": 1,
+    "h": 2,
+    "c": 2,
+    "title": "Szorongásos-stressz állapot",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos-stressz állapot (ELEVATED)"
+  },
+  {
+    "code": "2123",
+    "a": 2,
+    "p": 1,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "2124",
+    "a": 2,
+    "p": 1,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "2131",
+    "a": 2,
+    "p": 1,
+    "h": 3,
+    "c": 1,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "2132",
+    "a": 2,
+    "p": 1,
+    "h": 3,
+    "c": 2,
+    "title": "Diszregulált terheltség",
+    "severity": "CRITICAL",
+    "profile": "Diszregulált terheltség (CRITICAL)"
+  },
+  {
+    "code": "2133",
+    "a": 2,
+    "p": 1,
+    "h": 3,
+    "c": 3,
+    "title": "Pszichoszomatikus krízis",
+    "severity": "CRITICAL",
+    "profile": "Pszichoszomatikus krízis (CRITICAL)"
+  },
+  {
+    "code": "2134",
+    "a": 2,
+    "p": 1,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatikus krízis",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatikus krízis (CRITICAL)"
+  },
+  {
+    "code": "2141",
+    "a": 2,
+    "p": 1,
+    "h": 4,
+    "c": 1,
+    "title": "Akut szorongás / Pánik",
+    "severity": "CRITICAL",
+    "profile": "Akut szorongás / Pánik (CRITICAL)"
+  },
+  {
+    "code": "2142",
+    "a": 2,
+    "p": 1,
+    "h": 4,
+    "c": 2,
+    "title": "Teljes diszreguláció",
+    "severity": "CRITICAL",
+    "profile": "Teljes diszreguláció (CRITICAL)"
+  },
+  {
+    "code": "2143",
+    "a": 2,
+    "p": 1,
+    "h": 4,
+    "c": 3,
+    "title": "Krízisállapot",
+    "severity": "CRITICAL",
+    "profile": "Krízisállapot (CRITICAL)"
+  },
+  {
+    "code": "2144",
+    "a": 2,
+    "p": 1,
+    "h": 4,
+    "c": 4,
+    "title": "Teljes összeomlás",
+    "severity": "CRITICAL",
+    "profile": "Teljes összeomlás (CRITICAL)"
+  },
+  {
+    "code": "2211",
+    "a": 2,
+    "p": 2,
+    "h": 1,
+    "c": 1,
+    "title": "Enyhe szorongás",
+    "severity": "NORMAL",
+    "profile": "Enyhe szorongás (NORMAL)"
+  },
+  {
+    "code": "2212",
+    "a": 2,
+    "p": 2,
+    "h": 1,
+    "c": 2,
+    "title": "Szorongásos tünetek",
+    "severity": "NORMAL",
+    "profile": "Szorongásos tünetek (NORMAL)"
+  },
+  {
+    "code": "2213",
+    "a": 2,
+    "p": 2,
+    "h": 1,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "2214",
+    "a": 2,
+    "p": 2,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "2221",
+    "a": 2,
+    "p": 2,
+    "h": 2,
+    "c": 1,
+    "title": "Szorongásos készenlét",
+    "severity": "NORMAL",
+    "profile": "Szorongásos készenlét (NORMAL)"
+  },
+  {
+    "code": "2222",
+    "a": 2,
+    "p": 2,
+    "h": 2,
+    "c": 2,
+    "title": "Általános szorongás",
+    "severity": "ELEVATED",
+    "profile": "Általános szorongás (ELEVATED)"
+  },
+  {
+    "code": "2223",
+    "a": 2,
+    "p": 2,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongás és stressz",
+    "severity": "ELEVATED",
+    "profile": "Szorongás és stressz (ELEVATED)"
+  },
+  {
+    "code": "2224",
+    "a": 2,
+    "p": 2,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "2231",
+    "a": 2,
+    "p": 2,
+    "h": 3,
+    "c": 1,
+    "title": "Rejtett stressz és szorongás",
+    "severity": "ELEVATED",
+    "profile": "Rejtett stressz és szorongás (ELEVATED)"
+  },
+  {
+    "code": "2232",
+    "a": 2,
+    "p": 2,
+    "h": 3,
+    "c": 2,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "ELEVATED",
+    "profile": "Krónikus stressz-szorongás (ELEVATED)"
+  },
+  {
+    "code": "2233",
+    "a": 2,
+    "p": 2,
+    "h": 3,
+    "c": 3,
+    "title": "Túlterhelt rendszer",
+    "severity": "ELEVATED",
+    "profile": "Túlterhelt rendszer (ELEVATED)"
+  },
+  {
+    "code": "2234",
+    "a": 2,
+    "p": 2,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "2241",
+    "a": 2,
+    "p": 2,
+    "h": 4,
+    "c": 1,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "2242",
+    "a": 2,
+    "p": 2,
+    "h": 4,
+    "c": 2,
+    "title": "Burnout szorongással",
+    "severity": "CRITICAL",
+    "profile": "Burnout szorongással (CRITICAL)"
+  },
+  {
+    "code": "2243",
+    "a": 2,
+    "p": 2,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "2244",
+    "a": 2,
+    "p": 2,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "2311",
+    "a": 2,
+    "p": 3,
+    "h": 1,
+    "c": 1,
+    "title": "Kompenzált szorongás",
+    "severity": "NORMAL",
+    "profile": "Kompenzált szorongás (NORMAL)"
+  },
+  {
+    "code": "2312",
+    "a": 2,
+    "p": 3,
+    "h": 1,
+    "c": 2,
+    "title": "Szorongás enyhe tünetekkel",
+    "severity": "NORMAL",
+    "profile": "Szorongás enyhe tünetekkel (NORMAL)"
+  },
+  {
+    "code": "2313",
+    "a": 2,
+    "p": 3,
+    "h": 1,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "2314",
+    "a": 2,
+    "p": 3,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "2321",
+    "a": 2,
+    "p": 3,
+    "h": 2,
+    "c": 1,
+    "title": "Jól kezelt szorongás",
+    "severity": "NORMAL",
+    "profile": "Jól kezelt szorongás (NORMAL)"
+  },
+  {
+    "code": "2322",
+    "a": 2,
+    "p": 3,
+    "h": 2,
+    "c": 2,
+    "title": "Kompenzált szorongás",
+    "severity": "NORMAL",
+    "profile": "Kompenzált szorongás (NORMAL)"
+  },
+  {
+    "code": "2323",
+    "a": 2,
+    "p": 3,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongás és stressz",
+    "severity": "ELEVATED",
+    "profile": "Szorongás és stressz (ELEVATED)"
+  },
+  {
+    "code": "2324",
+    "a": 2,
+    "p": 3,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "2331",
+    "a": 2,
+    "p": 3,
+    "h": 3,
+    "c": 1,
+    "title": "Feszített egyensúly",
+    "severity": "NORMAL",
+    "profile": "Feszített egyensúly (NORMAL)"
+  },
+  {
+    "code": "2332",
+    "a": 2,
+    "p": 3,
+    "h": 3,
+    "c": 2,
+    "title": "Kompenzált túlfeszülés",
+    "severity": "ELEVATED",
+    "profile": "Kompenzált túlfeszülés (ELEVATED)"
+  },
+  {
+    "code": "2333",
+    "a": 2,
+    "p": 3,
+    "h": 3,
+    "c": 3,
+    "title": "Túlterhelt rendszer",
+    "severity": "ELEVATED",
+    "profile": "Túlterhelt rendszer (ELEVATED)"
+  },
+  {
+    "code": "2334",
+    "a": 2,
+    "p": 3,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "2341",
+    "a": 2,
+    "p": 3,
+    "h": 4,
+    "c": 1,
+    "title": "Magas funkciójú burnout",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú burnout (CRITICAL)"
+  },
+  {
+    "code": "2342",
+    "a": 2,
+    "p": 3,
+    "h": 4,
+    "c": 2,
+    "title": "Túlkontrollált krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Túlkontrollált krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "2343",
+    "a": 2,
+    "p": 3,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "2344",
+    "a": 2,
+    "p": 3,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "2411",
+    "a": 2,
+    "p": 4,
+    "h": 1,
+    "c": 1,
+    "title": "Kiválóan kompenzált szorongás",
+    "severity": "LOW",
+    "profile": "Kiválóan kompenzált szorongás (LOW)"
+  },
+  {
+    "code": "2412",
+    "a": 2,
+    "p": 4,
+    "h": 1,
+    "c": 2,
+    "title": "Jól kezelt szorongás",
+    "severity": "LOW",
+    "profile": "Jól kezelt szorongás (LOW)"
+  },
+  {
+    "code": "2413",
+    "a": 2,
+    "p": 4,
+    "h": 1,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "2414",
+    "a": 2,
+    "p": 4,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "2421",
+    "a": 2,
+    "p": 4,
+    "h": 2,
+    "c": 1,
+    "title": "Jól kezelt szorongás",
+    "severity": "LOW",
+    "profile": "Jól kezelt szorongás (LOW)"
+  },
+  {
+    "code": "2422",
+    "a": 2,
+    "p": 4,
+    "h": 2,
+    "c": 2,
+    "title": "Stabil, de szorongó",
+    "severity": "NORMAL",
+    "profile": "Stabil, de szorongó (NORMAL)"
+  },
+  {
+    "code": "2423",
+    "a": 2,
+    "p": 4,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongás és stressz",
+    "severity": "ELEVATED",
+    "profile": "Szorongás és stressz (ELEVATED)"
+  },
+  {
+    "code": "2424",
+    "a": 2,
+    "p": 4,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "2431",
+    "a": 2,
+    "p": 4,
+    "h": 3,
+    "c": 1,
+    "title": "Feszített egyensúly",
+    "severity": "NORMAL",
+    "profile": "Feszített egyensúly (NORMAL)"
+  },
+  {
+    "code": "2432",
+    "a": 2,
+    "p": 4,
+    "h": 3,
+    "c": 2,
+    "title": "Kompenzált túlfeszülés",
+    "severity": "NORMAL",
+    "profile": "Kompenzált túlfeszülés (NORMAL)"
+  },
+  {
+    "code": "2433",
+    "a": 2,
+    "p": 4,
+    "h": 3,
+    "c": 3,
+    "title": "Magas funkciójú túlterheltség",
+    "severity": "ELEVATED",
+    "profile": "Magas funkciójú túlterheltség (ELEVATED)"
+  },
+  {
+    "code": "2434",
+    "a": 2,
+    "p": 4,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "2441",
+    "a": 2,
+    "p": 4,
+    "h": 4,
+    "c": 1,
+    "title": "Magas funkciójú burnout",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú burnout (CRITICAL)"
+  },
+  {
+    "code": "2442",
+    "a": 2,
+    "p": 4,
+    "h": 4,
+    "c": 2,
+    "title": "Túlkontrollált krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Túlkontrollált krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "2443",
+    "a": 2,
+    "p": 4,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "2444",
+    "a": 2,
+    "p": 4,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "3111",
+    "a": 3,
+    "p": 1,
+    "h": 1,
+    "c": 1,
+    "title": "Viselkedési kompenzáció",
+    "severity": "ELEVATED",
+    "profile": "Viselkedési kompenzáció (ELEVATED)"
+  },
+  {
+    "code": "3112",
+    "a": 3,
+    "p": 1,
+    "h": 1,
+    "c": 2,
+    "title": "Szomatizáló viselkedés",
+    "severity": "ELEVATED",
+    "profile": "Szomatizáló viselkedés (ELEVATED)"
+  },
+  {
+    "code": "3113",
+    "a": 3,
+    "p": 1,
+    "h": 1,
+    "c": 3,
+    "title": "Erős szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Erős szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "3114",
+    "a": 3,
+    "p": 1,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "3121",
+    "a": 3,
+    "p": 1,
+    "h": 2,
+    "c": 1,
+    "title": "Viselkedési kontrollvesztés",
+    "severity": "ELEVATED",
+    "profile": "Viselkedési kontrollvesztés (ELEVATED)"
+  },
+  {
+    "code": "3122",
+    "a": 3,
+    "p": 1,
+    "h": 2,
+    "c": 2,
+    "title": "Labilis, szorongó állapot",
+    "severity": "ELEVATED",
+    "profile": "Labilis, szorongó állapot (ELEVATED)"
+  },
+  {
+    "code": "3123",
+    "a": 3,
+    "p": 1,
+    "h": 2,
+    "c": 3,
+    "title": "Diszregulált szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Diszregulált szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "3124",
+    "a": 3,
+    "p": 1,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "3131",
+    "a": 3,
+    "p": 1,
+    "h": 3,
+    "c": 1,
+    "title": "Rejtett krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Rejtett krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "3132",
+    "a": 3,
+    "p": 1,
+    "h": 3,
+    "c": 2,
+    "title": "Diszregulált terheltség",
+    "severity": "CRITICAL",
+    "profile": "Diszregulált terheltség (CRITICAL)"
+  },
+  {
+    "code": "3133",
+    "a": 3,
+    "p": 1,
+    "h": 3,
+    "c": 3,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "3134",
+    "a": 3,
+    "p": 1,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "3141",
+    "a": 3,
+    "p": 1,
+    "h": 4,
+    "c": 1,
+    "title": "Akut krízis kontroll nélkül",
+    "severity": "CRITICAL",
+    "profile": "Akut krízis kontroll nélkül (CRITICAL)"
+  },
+  {
+    "code": "3142",
+    "a": 3,
+    "p": 1,
+    "h": 4,
+    "c": 2,
+    "title": "Teljes diszreguláció",
+    "severity": "CRITICAL",
+    "profile": "Teljes diszreguláció (CRITICAL)"
+  },
+  {
+    "code": "3143",
+    "a": 3,
+    "p": 1,
+    "h": 4,
+    "c": 3,
+    "title": "Összeomlás",
+    "severity": "CRITICAL",
+    "profile": "Összeomlás (CRITICAL)"
+  },
+  {
+    "code": "3144",
+    "a": 3,
+    "p": 1,
+    "h": 4,
+    "c": 4,
+    "title": "Teljes rendszerösszeomlás",
+    "severity": "CRITICAL",
+    "profile": "Teljes rendszerösszeomlás (CRITICAL)"
+  },
+  {
+    "code": "3211",
+    "a": 3,
+    "p": 2,
+    "h": 1,
+    "c": 1,
+    "title": "Viselkedési kompenzáció",
+    "severity": "NORMAL",
+    "profile": "Viselkedési kompenzáció (NORMAL)"
+  },
+  {
+    "code": "3212",
+    "a": 3,
+    "p": 2,
+    "h": 1,
+    "c": 2,
+    "title": "Szomatizáló viselkedés",
+    "severity": "NORMAL",
+    "profile": "Szomatizáló viselkedés (NORMAL)"
+  },
+  {
+    "code": "3213",
+    "a": 3,
+    "p": 2,
+    "h": 1,
+    "c": 3,
+    "title": "Erős szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Erős szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "3214",
+    "a": 3,
+    "p": 2,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "3221",
+    "a": 3,
+    "p": 2,
+    "h": 2,
+    "c": 1,
+    "title": "Viselkedési kompenzáció",
+    "severity": "NORMAL",
+    "profile": "Viselkedési kompenzáció (NORMAL)"
+  },
+  {
+    "code": "3222",
+    "a": 3,
+    "p": 2,
+    "h": 2,
+    "c": 2,
+    "title": "Általános szorongás",
+    "severity": "ELEVATED",
+    "profile": "Általános szorongás (ELEVATED)"
+  },
+  {
+    "code": "3223",
+    "a": 3,
+    "p": 2,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "3224",
+    "a": 3,
+    "p": 2,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "3231",
+    "a": 3,
+    "p": 2,
+    "h": 3,
+    "c": 1,
+    "title": "Rejtett krónikus stressz",
+    "severity": "ELEVATED",
+    "profile": "Rejtett krónikus stressz (ELEVATED)"
+  },
+  {
+    "code": "3232",
+    "a": 3,
+    "p": 2,
+    "h": 3,
+    "c": 2,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "ELEVATED",
+    "profile": "Krónikus stressz-szorongás (ELEVATED)"
+  },
+  {
+    "code": "3233",
+    "a": 3,
+    "p": 2,
+    "h": 3,
+    "c": 3,
+    "title": "Túlterhelt rendszer",
+    "severity": "ELEVATED",
+    "profile": "Túlterhelt rendszer (ELEVATED)"
+  },
+  {
+    "code": "3234",
+    "a": 3,
+    "p": 2,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "3241",
+    "a": 3,
+    "p": 2,
+    "h": 4,
+    "c": 1,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "3242",
+    "a": 3,
+    "p": 2,
+    "h": 4,
+    "c": 2,
+    "title": "Burnout szorongással",
+    "severity": "CRITICAL",
+    "profile": "Burnout szorongással (CRITICAL)"
+  },
+  {
+    "code": "3243",
+    "a": 3,
+    "p": 2,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "3244",
+    "a": 3,
+    "p": 2,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "3311",
+    "a": 3,
+    "p": 3,
+    "h": 1,
+    "c": 1,
+    "title": "Erős érzelmi kontroll",
+    "severity": "NORMAL",
+    "profile": "Erős érzelmi kontroll (NORMAL)"
+  },
+  {
+    "code": "3312",
+    "a": 3,
+    "p": 3,
+    "h": 1,
+    "c": 2,
+    "title": "Maszkírozott szorongás",
+    "severity": "NORMAL",
+    "profile": "Maszkírozott szorongás (NORMAL)"
+  },
+  {
+    "code": "3313",
+    "a": 3,
+    "p": 3,
+    "h": 1,
+    "c": 3,
+    "title": "Erős szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Erős szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "3314",
+    "a": 3,
+    "p": 3,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "3321",
+    "a": 3,
+    "p": 3,
+    "h": 2,
+    "c": 1,
+    "title": "Erős érzelmi kontroll",
+    "severity": "NORMAL",
+    "profile": "Erős érzelmi kontroll (NORMAL)"
+  },
+  {
+    "code": "3322",
+    "a": 3,
+    "p": 3,
+    "h": 2,
+    "c": 2,
+    "title": "Kompenzált szorongás",
+    "severity": "ELEVATED",
+    "profile": "Kompenzált szorongás (ELEVATED)"
+  },
+  {
+    "code": "3323",
+    "a": 3,
+    "p": 3,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "3324",
+    "a": 3,
+    "p": 3,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "3331",
+    "a": 3,
+    "p": 3,
+    "h": 3,
+    "c": 1,
+    "title": "Rejtett krónikus stressz",
+    "severity": "ELEVATED",
+    "profile": "Rejtett krónikus stressz (ELEVATED)"
+  },
+  {
+    "code": "3332",
+    "a": 3,
+    "p": 3,
+    "h": 3,
+    "c": 2,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "ELEVATED",
+    "profile": "Krónikus stressz-szorongás (ELEVATED)"
+  },
+  {
+    "code": "3333",
+    "a": 3,
+    "p": 3,
+    "h": 3,
+    "c": 3,
+    "title": "Túlterhelt, de rugalmas",
+    "severity": "ELEVATED",
+    "profile": "Túlterhelt, de rugalmas (ELEVATED)"
+  },
+  {
+    "code": "3334",
+    "a": 3,
+    "p": 3,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "3341",
+    "a": 3,
+    "p": 3,
+    "h": 4,
+    "c": 1,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "3342",
+    "a": 3,
+    "p": 3,
+    "h": 4,
+    "c": 2,
+    "title": "Burnout szorongással",
+    "severity": "CRITICAL",
+    "profile": "Burnout szorongással (CRITICAL)"
+  },
+  {
+    "code": "3343",
+    "a": 3,
+    "p": 3,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "3344",
+    "a": 3,
+    "p": 3,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "3411",
+    "a": 3,
+    "p": 4,
+    "h": 1,
+    "c": 1,
+    "title": "Túlkontrollált viselkedés",
+    "severity": "NORMAL",
+    "profile": "Túlkontrollált viselkedés (NORMAL)"
+  },
+  {
+    "code": "3412",
+    "a": 3,
+    "p": 4,
+    "h": 1,
+    "c": 2,
+    "title": "Túlkontrollált szorongás",
+    "severity": "NORMAL",
+    "profile": "Túlkontrollált szorongás (NORMAL)"
+  },
+  {
+    "code": "3413",
+    "a": 3,
+    "p": 4,
+    "h": 1,
+    "c": 3,
+    "title": "Erős szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Erős szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "3414",
+    "a": 3,
+    "p": 4,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "3421",
+    "a": 3,
+    "p": 4,
+    "h": 2,
+    "c": 1,
+    "title": "Túlkontrollált szorongás",
+    "severity": "NORMAL",
+    "profile": "Túlkontrollált szorongás (NORMAL)"
+  },
+  {
+    "code": "3422",
+    "a": 3,
+    "p": 4,
+    "h": 2,
+    "c": 2,
+    "title": "Kompenzált szorongás",
+    "severity": "ELEVATED",
+    "profile": "Kompenzált szorongás (ELEVATED)"
+  },
+  {
+    "code": "3423",
+    "a": 3,
+    "p": 4,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "ELEVATED",
+    "profile": "Szorongásos szomatizáció (ELEVATED)"
+  },
+  {
+    "code": "3424",
+    "a": 3,
+    "p": 4,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "3431",
+    "a": 3,
+    "p": 4,
+    "h": 3,
+    "c": 1,
+    "title": "Rejtett krónikus stressz",
+    "severity": "ELEVATED",
+    "profile": "Rejtett krónikus stressz (ELEVATED)"
+  },
+  {
+    "code": "3432",
+    "a": 3,
+    "p": 4,
+    "h": 3,
+    "c": 2,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "ELEVATED",
+    "profile": "Krónikus stressz-szorongás (ELEVATED)"
+  },
+  {
+    "code": "3433",
+    "a": 3,
+    "p": 4,
+    "h": 3,
+    "c": 3,
+    "title": "Magas funkciójú túlterheltség",
+    "severity": "ELEVATED",
+    "profile": "Magas funkciójú túlterheltség (ELEVATED)"
+  },
+  {
+    "code": "3434",
+    "a": 3,
+    "p": 4,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "3441",
+    "a": 3,
+    "p": 4,
+    "h": 4,
+    "c": 1,
+    "title": "Magas funkciójú burnout",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú burnout (CRITICAL)"
+  },
+  {
+    "code": "3442",
+    "a": 3,
+    "p": 4,
+    "h": 4,
+    "c": 2,
+    "title": "Túlkontrollált krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Túlkontrollált krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "3443",
+    "a": 3,
+    "p": 4,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "3444",
+    "a": 3,
+    "p": 4,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4111",
+    "a": 4,
+    "p": 1,
+    "h": 1,
+    "c": 1,
+    "title": "Akut szorongás",
+    "severity": "CRITICAL",
+    "profile": "Akut szorongás (CRITICAL)"
+  },
+  {
+    "code": "4112",
+    "a": 4,
+    "p": 1,
+    "h": 1,
+    "c": 2,
+    "title": "Szomatizáló pánik",
+    "severity": "CRITICAL",
+    "profile": "Szomatizáló pánik (CRITICAL)"
+  },
+  {
+    "code": "4113",
+    "a": 4,
+    "p": 1,
+    "h": 1,
+    "c": 3,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4114",
+    "a": 4,
+    "p": 1,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4121",
+    "a": 4,
+    "p": 1,
+    "h": 2,
+    "c": 1,
+    "title": "Akut szorongás",
+    "severity": "CRITICAL",
+    "profile": "Akut szorongás (CRITICAL)"
+  },
+  {
+    "code": "4122",
+    "a": 4,
+    "p": 1,
+    "h": 2,
+    "c": 2,
+    "title": "Diszregulált szorongás",
+    "severity": "CRITICAL",
+    "profile": "Diszregulált szorongás (CRITICAL)"
+  },
+  {
+    "code": "4123",
+    "a": 4,
+    "p": 1,
+    "h": 2,
+    "c": 3,
+    "title": "Pánik és szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Pánik és szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4124",
+    "a": 4,
+    "p": 1,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4131",
+    "a": 4,
+    "p": 1,
+    "h": 3,
+    "c": 1,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "4132",
+    "a": 4,
+    "p": 1,
+    "h": 3,
+    "c": 2,
+    "title": "Diszregulált összeomlás",
+    "severity": "CRITICAL",
+    "profile": "Diszregulált összeomlás (CRITICAL)"
+  },
+  {
+    "code": "4133",
+    "a": 4,
+    "p": 1,
+    "h": 3,
+    "c": 3,
+    "title": "Teljes diszreguláció",
+    "severity": "CRITICAL",
+    "profile": "Teljes diszreguláció (CRITICAL)"
+  },
+  {
+    "code": "4134",
+    "a": 4,
+    "p": 1,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4141",
+    "a": 4,
+    "p": 1,
+    "h": 4,
+    "c": 1,
+    "title": "Akut krízis",
+    "severity": "CRITICAL",
+    "profile": "Akut krízis (CRITICAL)"
+  },
+  {
+    "code": "4142",
+    "a": 4,
+    "p": 1,
+    "h": 4,
+    "c": 2,
+    "title": "Teljes összeomlás",
+    "severity": "CRITICAL",
+    "profile": "Teljes összeomlás (CRITICAL)"
+  },
+  {
+    "code": "4143",
+    "a": 4,
+    "p": 1,
+    "h": 4,
+    "c": 3,
+    "title": "Kritikus állapot",
+    "severity": "CRITICAL",
+    "profile": "Kritikus állapot (CRITICAL)"
+  },
+  {
+    "code": "4144",
+    "a": 4,
+    "p": 1,
+    "h": 4,
+    "c": 4,
+    "title": "Teljes rendszerösszeomlás",
+    "severity": "CRITICAL",
+    "profile": "Teljes rendszerösszeomlás (CRITICAL)"
+  },
+  {
+    "code": "4211",
+    "a": 4,
+    "p": 2,
+    "h": 1,
+    "c": 1,
+    "title": "Akut szorongás",
+    "severity": "CRITICAL",
+    "profile": "Akut szorongás (CRITICAL)"
+  },
+  {
+    "code": "4212",
+    "a": 4,
+    "p": 2,
+    "h": 1,
+    "c": 2,
+    "title": "Szomatizáló pánik",
+    "severity": "CRITICAL",
+    "profile": "Szomatizáló pánik (CRITICAL)"
+  },
+  {
+    "code": "4213",
+    "a": 4,
+    "p": 2,
+    "h": 1,
+    "c": 3,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4214",
+    "a": 4,
+    "p": 2,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4221",
+    "a": 4,
+    "p": 2,
+    "h": 2,
+    "c": 1,
+    "title": "Akut szorongás",
+    "severity": "CRITICAL",
+    "profile": "Akut szorongás (CRITICAL)"
+  },
+  {
+    "code": "4222",
+    "a": 4,
+    "p": 2,
+    "h": 2,
+    "c": 2,
+    "title": "Krónikus szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus szorongás (CRITICAL)"
+  },
+  {
+    "code": "4223",
+    "a": 4,
+    "p": 2,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Szorongásos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4224",
+    "a": 4,
+    "p": 2,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4231",
+    "a": 4,
+    "p": 2,
+    "h": 3,
+    "c": 1,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "4232",
+    "a": 4,
+    "p": 2,
+    "h": 3,
+    "c": 2,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "4233",
+    "a": 4,
+    "p": 2,
+    "h": 3,
+    "c": 3,
+    "title": "Túlterhelt rendszer",
+    "severity": "CRITICAL",
+    "profile": "Túlterhelt rendszer (CRITICAL)"
+  },
+  {
+    "code": "4234",
+    "a": 4,
+    "p": 2,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4241",
+    "a": 4,
+    "p": 2,
+    "h": 4,
+    "c": 1,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "4242",
+    "a": 4,
+    "p": 2,
+    "h": 4,
+    "c": 2,
+    "title": "Burnout és szorongás",
+    "severity": "CRITICAL",
+    "profile": "Burnout és szorongás (CRITICAL)"
+  },
+  {
+    "code": "4243",
+    "a": 4,
+    "p": 2,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "4244",
+    "a": 4,
+    "p": 2,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4311",
+    "a": 4,
+    "p": 3,
+    "h": 1,
+    "c": 1,
+    "title": "Túlkontrollált pánik",
+    "severity": "CRITICAL",
+    "profile": "Túlkontrollált pánik (CRITICAL)"
+  },
+  {
+    "code": "4312",
+    "a": 4,
+    "p": 3,
+    "h": 1,
+    "c": 2,
+    "title": "Szomatizáló pánik",
+    "severity": "CRITICAL",
+    "profile": "Szomatizáló pánik (CRITICAL)"
+  },
+  {
+    "code": "4313",
+    "a": 4,
+    "p": 3,
+    "h": 1,
+    "c": 3,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4314",
+    "a": 4,
+    "p": 3,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4321",
+    "a": 4,
+    "p": 3,
+    "h": 2,
+    "c": 1,
+    "title": "Túlkontrollált szorongás",
+    "severity": "CRITICAL",
+    "profile": "Túlkontrollált szorongás (CRITICAL)"
+  },
+  {
+    "code": "4322",
+    "a": 4,
+    "p": 3,
+    "h": 2,
+    "c": 2,
+    "title": "Kompenzált krónikus szorongás",
+    "severity": "CRITICAL",
+    "profile": "Kompenzált krónikus szorongás (CRITICAL)"
+  },
+  {
+    "code": "4323",
+    "a": 4,
+    "p": 3,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Szorongásos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4324",
+    "a": 4,
+    "p": 3,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4331",
+    "a": 4,
+    "p": 3,
+    "h": 3,
+    "c": 1,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "4332",
+    "a": 4,
+    "p": 3,
+    "h": 3,
+    "c": 2,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "4333",
+    "a": 4,
+    "p": 3,
+    "h": 3,
+    "c": 3,
+    "title": "Magas funkciójú szorongás",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú szorongás (CRITICAL)"
+  },
+  {
+    "code": "4334",
+    "a": 4,
+    "p": 3,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4341",
+    "a": 4,
+    "p": 3,
+    "h": 4,
+    "c": 1,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "4342",
+    "a": 4,
+    "p": 3,
+    "h": 4,
+    "c": 2,
+    "title": "Burnout és szorongás",
+    "severity": "CRITICAL",
+    "profile": "Burnout és szorongás (CRITICAL)"
+  },
+  {
+    "code": "4343",
+    "a": 4,
+    "p": 3,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "4344",
+    "a": 4,
+    "p": 3,
+    "h": 4,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4411",
+    "a": 4,
+    "p": 4,
+    "h": 1,
+    "c": 1,
+    "title": "Túlkontrollált pánik",
+    "severity": "CRITICAL",
+    "profile": "Túlkontrollált pánik (CRITICAL)"
+  },
+  {
+    "code": "4412",
+    "a": 4,
+    "p": 4,
+    "h": 1,
+    "c": 2,
+    "title": "Szomatizáló pánik",
+    "severity": "CRITICAL",
+    "profile": "Szomatizáló pánik (CRITICAL)"
+  },
+  {
+    "code": "4413",
+    "a": 4,
+    "p": 4,
+    "h": 1,
+    "c": 3,
+    "title": "Súlyos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Súlyos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4414",
+    "a": 4,
+    "p": 4,
+    "h": 1,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4421",
+    "a": 4,
+    "p": 4,
+    "h": 2,
+    "c": 1,
+    "title": "Túlkontrollált szorongás",
+    "severity": "CRITICAL",
+    "profile": "Túlkontrollált szorongás (CRITICAL)"
+  },
+  {
+    "code": "4422",
+    "a": 4,
+    "p": 4,
+    "h": 2,
+    "c": 2,
+    "title": "Kompenzált krónikus szorongás",
+    "severity": "CRITICAL",
+    "profile": "Kompenzált krónikus szorongás (CRITICAL)"
+  },
+  {
+    "code": "4423",
+    "a": 4,
+    "p": 4,
+    "h": 2,
+    "c": 3,
+    "title": "Szorongásos szomatizáció",
+    "severity": "CRITICAL",
+    "profile": "Szorongásos szomatizáció (CRITICAL)"
+  },
+  {
+    "code": "4424",
+    "a": 4,
+    "p": 4,
+    "h": 2,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4431",
+    "a": 4,
+    "p": 4,
+    "h": 3,
+    "c": 1,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "4432",
+    "a": 4,
+    "p": 4,
+    "h": 3,
+    "c": 2,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "4433",
+    "a": 4,
+    "p": 4,
+    "h": 3,
+    "c": 3,
+    "title": "Magas funkciójú szorongás",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú szorongás (CRITICAL)"
+  },
+  {
+    "code": "4434",
+    "a": 4,
+    "p": 4,
+    "h": 3,
+    "c": 4,
+    "title": "Súlyos pszichoszomatika",
+    "severity": "CRITICAL",
+    "profile": "Súlyos pszichoszomatika (CRITICAL)"
+  },
+  {
+    "code": "4441",
+    "a": 4,
+    "p": 4,
+    "h": 4,
+    "c": 1,
+    "title": "Krónikus stressz",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz (CRITICAL)"
+  },
+  {
+    "code": "4442",
+    "a": 4,
+    "p": 4,
+    "h": 4,
+    "c": 2,
+    "title": "Magas funkciójú burnout",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú burnout (CRITICAL)"
+  },
+  {
+    "code": "4443",
+    "a": 4,
+    "p": 4,
+    "h": 4,
+    "c": 3,
+    "title": "Krónikus stressz-szorongás",
+    "severity": "CRITICAL",
+    "profile": "Krónikus stressz-szorongás (CRITICAL)"
+  },
+  {
+    "code": "4444",
+    "a": 4,
+    "p": 4,
+    "h": 4,
+    "c": 4,
+    "title": "Magas funkciójú összeomlás",
+    "severity": "CRITICAL",
+    "profile": "Magas funkciójú összeomlás (CRITICAL)"
+  }
+]

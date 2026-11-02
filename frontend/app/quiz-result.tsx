@@ -16,13 +16,14 @@ type GoalSuggestion = { text: string; scale: string };
 type InterpretationScale = {
   key: string;
   label: string;
-  pomp: number;
-  band: number;
+  pomp: number | null;
+  band: number | null;
   band_label: string;
   text: string;
 };
 
 type Interpretation = {
+  has_measurement?: boolean;
   scales: InterpretationScale[];
   overall: { code: string; title: string; severity: string } | null;
   disclaimer: string;
@@ -160,7 +161,7 @@ export default function QuizResultScreen() {
             ) : null}
 
             <T variant="body" color="rgba(247,251,255,0.72)" align="center" style={styles.note}>
-              A mérés sikeresen lezárult. Myra már felkészült a fogadásodra - személyre szabott beszélgetéssel vár.
+              {interpretation?.has_measurement === false ? "Az állapotkód rögzítve. A kézzel megadott kódhoz nem tartozik kérdőíves mérési eredmény." : "A mérés sikeresen lezárult. Myra már felkészült a fogadásodra - személyre szabott beszélgetéssel vár."}
             </T>
           </LinearGradient>
 
@@ -188,7 +189,7 @@ export default function QuizResultScreen() {
                     </T>
                     <View style={styles.interpChip}>
                       <T variant="small" color={theme.accentSoft} style={{ fontSize: 10 }}>
-                        {s.band_label} · {s.pomp}
+                        {s.pomp === null ? "Nincs mérési adat" : `${s.band_label} · ${s.pomp}`}
                       </T>
                     </View>
                   </View>

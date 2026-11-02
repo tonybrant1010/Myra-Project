@@ -1,6 +1,6 @@
 export const termsText = `FELHASZNÁLÁSI FELTÉTELEK
 
-Hatályos: 2026. október 14.
+Hatályos: 2026. november 2.
 
 1. A szolgáltatás jellege
 A Myra egy magánszemély által, nem kereskedelmi célból fejlesztett, mérésvezérelt, reflektív mentálhigiénés önismereti alkalmazás. A rendszer az ESV-modell (Érzelem-Stressz-Viselkedés) alapján működik: önkitöltős állapotfelmérést, belső állapotkódot és mesterséges intelligenciával támogatott beszélgetési keretet biztosít.
@@ -30,7 +30,7 @@ A Myra válaszait részben mesterséges intelligencia alapú rendszer állítja 
 
 A válaszadás során a rendszer az aktuális üzenet mellett a beszélgetés korábbi részleteit, a mérési állapotkódhoz kapcsolódó kontextust, a felhasználó által vállalt mikro-célokat és a PDF alapú tudásanyagból visszakeresett releváns részleteket is felhasználhatja. Ez a beszélgetés folytonosságát szolgálja, de nem jelent diagnózist, szakvéleményt vagy terápiás döntést.
 
-A felhasználó külön kapcsolóval engedélyezheti a "Myra memóriája" funkciót. Bekapcsolt állapotban a rendszer a felhasználó korábbi méréseiből és beszélgetéseiből rövid, pontokba szedett kivonatot tart magánál, és azt a válaszadásnál figyelembe veszi. A kivonat a bekapcsoláskor a korábbi adatokból azonnal elkészül, és később automatikusan frissül. Bekapcsolt memória mellett Myra a korábbi beszélgetésekből is visszakereshet néhány rövid, a mostanihoz hasonló részletet, és ha illik a beszélgetésbe, maga is visszautalhat rájuk. A funkció alapértelmezés szerint ki van kapcsolva, a Beállítások menüben bármikor be- és kikapcsolható, kikapcsoláskor pedig a kivonat törlődik. A kivonat leíró jellegű, nem diagnózis és nem szakvélemény; a mesterséges intelligencia korlátai rá is érvényesek, tehát tartalmazhat pontatlanságot.
+A felhasználó külön kapcsolóval engedélyezheti a "Myra memóriája" funkciót. Bekapcsolt állapotban a rendszer a felhasználó korábbi méréseiből és beszélgetéseiből összefoglalót (kivonatot) tart magánál, és azt a válaszadásnál figyelembe veszi. A kivonat a bekapcsoláskor a korábbi adatokból azonnal elkészül, és később automatikusan frissül. Bekapcsolt memória mellett Myra a korábbi beszélgetésekből is visszakereshet néhány rövid, a mostanihoz hasonló részletet, és ha illik a beszélgetésbe, maga is visszautalhat rájuk. A funkció alapértelmezés szerint ki van kapcsolva, a Beállítások menüben bármikor be- és kikapcsolható, kikapcsoláskor pedig a kivonat törlődik. A kivonat leíró jellegű, nem diagnózis és nem szakvélemény; a mesterséges intelligencia korlátai rá is érvényesek, tehát tartalmazhat pontatlanságot.
 
 A rendszer néhány nap kihagyás után a beszélgetést egy rövid, támogató visszakérdezéssel magától is újranyithatja. Ez ugyanazon beszélgetési kontextus alapján történik, tájékoztató és önismereti célú, és szintén nem minősül diagnózisnak vagy szakvéleménynek.
 

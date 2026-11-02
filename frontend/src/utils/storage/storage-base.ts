@@ -1,6 +1,6 @@
 
 
-export type StorageItemKey = string;
+type StorageItemKey = string;
 export type StorageItemValue = string | number | boolean | null;
 
 

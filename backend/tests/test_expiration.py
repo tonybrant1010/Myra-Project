@@ -37,8 +37,8 @@ engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 TestingSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
 
 
-
 FAKE_GEMINI_KEY = "AIza" + "Sy" + "A" * 33
+
 
 async def override_get_db():
     async with TestingSessionLocal() as session:
@@ -49,9 +49,11 @@ async def override_get_db():
             await session.rollback()
             raise
 
+
 @pytest.fixture
 def anyio_backend():
     return "asyncio"
+
 
 @pytest.fixture(autouse=True)
 async def init_db():
@@ -88,15 +90,15 @@ async def test_register_stores_legal_acceptance_metadata():
         "name": "Legal Ok",
         "password": "correct-password",
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
 
     assert response.status_code == 200
     async with TestingSessionLocal() as db:
         user = (await db.execute(select(User).where(User.email == "legal-ok@example.com"))).scalar_one()
-        assert user.terms_version == "2026-06-15"
-        assert user.privacy_version == "2026-06-15"
+        assert user.terms_version == "2026-11-02"
+        assert user.privacy_version == "2026-11-02.2"
         assert user.terms_accepted_at is not None
 
 
@@ -111,8 +113,8 @@ async def test_first_registered_user_is_not_admin_without_allowlist():
             "name": "First User",
             "password": "correct-password",
             "accepted_terms": True,
-            "accepted_terms_version": "2026-06-15",
-            "accepted_privacy_version": "2026-06-15",
+            "accepted_terms_version": "2026-11-02",
+            "accepted_privacy_version": "2026-11-02.2",
         })
 
         assert response.status_code == 200
@@ -136,8 +138,8 @@ async def test_register_assigns_admin_only_from_allowlist():
             "name": "Allowed Admin",
             "password": "correct-password",
             "accepted_terms": True,
-            "accepted_terms_version": "2026-06-15",
-            "accepted_privacy_version": "2026-06-15",
+            "accepted_terms_version": "2026-11-02",
+            "accepted_privacy_version": "2026-11-02.2",
         })
 
         assert response.status_code == 200
@@ -147,6 +149,7 @@ async def test_register_assigns_admin_only_from_allowlist():
     finally:
         ADMIN_EMAIL_ALLOWLIST.clear()
         ADMIN_EMAIL_ALLOWLIST.update(original_allowlist)
+
 
 @pytest.mark.anyio
 async def test_delete_account_removes_user_data_and_writes_minimal_audit():

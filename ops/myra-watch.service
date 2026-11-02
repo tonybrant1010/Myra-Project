@@ -5,18 +5,14 @@ Requires=docker.service
 
 [Service]
 Type=simple
-User=myra-admin
-EnvironmentFile=/etc/myra/ops.env
-ExecStart=/usr/bin/python3 ${MYRA_DIR}/ops/myra-watch.py
+User=<user>
+Environment=MYRA_DB_MOD=docker
+EnvironmentFile=-/etc/myra/ops.env
+ExecStart=/usr/bin/python3 /srv/backend/myra/ops/myra-watch.py
 Restart=always
 RestartSec=15
-
-
-
-
 MemoryMax=192M
 CPUQuota=10%
-
 StandardOutput=journal
 StandardError=journal
 

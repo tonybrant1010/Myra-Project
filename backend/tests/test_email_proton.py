@@ -1,18 +1,3 @@
-"""A kimenő e-mail réteg tesztjei.
-
-2026-10-14: a rendszer a Gmailről a Proton Mailre állt át. A levelek a Proton
-Mail Bridge helyi SMTP-portján mennek ki, a saját domainről
-(info@myra-project.hu). Ezek a tesztek azt őrzik, hogy
-
-- a Gmail-korszak maradványa (GMAIL_USER / GMAIL_APP_PASSWORD) ne kerüljön vissza,
-- minden levél a beállított Proton SMTP-n, a helyes feladóval és címzettel menjen ki,
-- a felhasználói fejlécekbe ne lehessen sortöréssel extra fejlécet injektálni,
-- hiányzó konfiguráció esetén a küldés csendben, kivétel nélkül elmaradjon.
-
-A tesztek nem hálózatoznak: a `smtplib.SMTP` helyett rögzítő helyettesítőt
-kapnak, így a levél teljes tartalma vizsgálható.
-"""
-
 import os
 import sys
 from email import message_from_string
@@ -26,7 +11,6 @@ import server  # noqa: E402
 
 
 class _FakeSMTP:
-    """Minimális SMTP-helyettesítő, amely megjegyzi a küldött leveleket."""
 
     instances: list["_FakeSMTP"] = []
 
@@ -57,7 +41,6 @@ class _FakeSMTP:
 
 @pytest.fixture
 def postafiok(monkeypatch):
-    """Beállít egy működő Proton-konfigurációt és elfogja a kimenő leveleket."""
     _FakeSMTP.instances = []
     monkeypatch.setattr(server.smtplib, "SMTP", _FakeSMTP)
     monkeypatch.setattr(server, "MYRA_SMTP_HOST", "proton-bridge")
@@ -88,12 +71,6 @@ def _body(msg) -> str:
 
 
 def _fejlec(msg, nev: str) -> str:
-    """A fejléc értéke dekódolva.
-
-    A nem-ASCII fejléceket (Subject) az e-mail csomag RFC2047 szerint kódolja
-    (pl. ``=?utf-8?b?...?=``), ezért a nyers `msg[nev]` nem hasonlítható össze
-    sima szöveggel.
-    """
     nyers = msg[nev]
     if nyers is None:
         return ""
@@ -101,7 +78,6 @@ def _fejlec(msg, nev: str) -> str:
 
 
 def test_gmail_valtozok_nem_tertek_vissza():
-    """A Gmail-korszak változói nem létezhetnek többé a modulban."""
     for nev in ("GMAIL_USER", "GMAIL_APP_PASSWORD", "_send_gmail_reset", "_send_gmail_security_code"):
         assert not hasattr(server, nev), f"A Gmail-maradvány visszakerült: {nev}"
 
@@ -122,7 +98,6 @@ def test_a_bridge_onalairt_tanusitvanya_nem_keri_a_teljes_ellenorzest(postafiok)
 
 
 def test_az_ellenorzes_bekapcsolhato_kulso_smtp_hez(postafiok, monkeypatch):
-    """Proton Business SMTP vagy más, valódi tanúsítványú végpont esetén."""
     monkeypatch.setattr(server, "MYRA_SMTP_TLS_VERIFY", True)
     _FakeSMTP.instances = []
     assert server._send_password_reset_email("felhasznalo@example.com", "123456") is True
@@ -132,10 +107,6 @@ def test_az_ellenorzes_bekapcsolhato_kulso_smtp_hez(postafiok, monkeypatch):
 
 
 def test_a_felado_fejlec_az_email_headerrel_keszul():
-    """A modulban a `Header` név a FastAPI-é, ezért a levél-FEJLÉCET a
-    `_MailHeader` alias adja. Enélkül a `Header(...)` hívás a FastAPI
-    függvényére futna, ami csak egy pozicionális argumentumot fogad —
-    2026-10-14-én ez éles hibát okozott a visszajelzés-küldésnél."""
     import email.header
 
     assert server._MailHeader is email.header.Header
@@ -156,14 +127,12 @@ def test_a_felado_a_sajat_domain(postafiok):
 
 
 def test_a_felhasznaloi_level_valaszcime_a_kapcsolattarto(postafiok):
-    """A noreply@-ra nem lehet válaszolni, ezért a Reply-To a nyilvános cím."""
     server._send_security_code_email("felhasznalo@example.com", "111111")
     _kapcsolat, _recipients, msg = _sent_message()
     assert msg["Reply-To"] == "info@myra-project.hu"
 
 
 def test_a_visszajelzes_valaszcime_a_felhasznalo(postafiok):
-    """A riasztás a rendszertől jön, de a válasz a visszajelzőhöz menjen."""
     server._send_feedback_email("Teszt Elek", "felhasznalo@example.com", 1, "chat", "szia")
     _kapcsolat, _recipients, msg = _sent_message()
     assert msg["Reply-To"] == "felhasznalo@example.com"
@@ -230,7 +199,6 @@ def test_a_riasztasi_cim_felulirhato(postafiok, monkeypatch):
 
 
 def test_fejlec_injekcio_nem_megy_at(postafiok):
-    """A felhasználói adatból származó fejlécértékbe nem kerülhet sortörés."""
     server._send_login_alert_email(
         "Teszt Elek", "felhasznalo@example.com\r\nBcc: tamado@evil.example", False,
         "1.2.3.4", "Teszt", "új eszköz",
@@ -272,8 +240,6 @@ def test_halozati_hiba_nem_dob_kivetelt(postafiok, monkeypatch):
 
 
 def test_indulaskor_figyelmeztet_a_cimeltresre(monkeypatch, caplog):
-    """A Proton SMTP token egy címhez szól: ha a user és a feladó eltér,
-    induláskor szóljunk, ne a semmitmondó 535-nél derüljön ki."""
     import logging
 
     monkeypatch.setattr(server, "MYRA_SMTP_USER", "info@myra-project.hu")
@@ -295,7 +261,6 @@ def test_egyezo_cimeknel_nincs_figyelmeztetes(monkeypatch, caplog):
 
 
 def test_az_535_hiba_megnevezi_a_cimeltrest(postafiok, monkeypatch, caplog):
-    """535 esetén a napló mondja meg, hogy a token/cím a baj."""
     import logging
 
     monkeypatch.setattr(server, "MYRA_SMTP_USER", "info@myra-project.hu")

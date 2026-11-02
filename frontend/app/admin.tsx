@@ -1,3 +1,4 @@
+import { confirmAction, showAlert } from "@/src/utils/dialog";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -7,7 +8,6 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  Alert,
   Modal,
   KeyboardAvoidingView,
   Platform,
@@ -49,18 +49,17 @@ export default function AdminScreen() {
   useEffect(() => {
     load();
   }, [load]);
-  const del = (code: string) => {
-    Alert.alert("Törlés", `Biztos törlöd a ${code} kódot?`, [
-      { text: "Mégse", style: "cancel" },
-      {
-        text: "Törlés",
-        style: "destructive",
-        onPress: async () => {
-          await authedFetch(token, `/api/admin/codes/${code}`, { method: "DELETE" });
-          load();
-        },
-      },
-    ]);
+  const del = async (code: string) => {
+    if (!await confirmAction("Törlés", `Biztos törlöd a ${code} kódot?`, "Törlés")) return;
+    try {
+      const r = await authedFetch(token, `/api/admin/codes/${code}`, { method: "DELETE" });
+      if (!r.ok) {
+        const data = await r.json().catch(() => ({}));
+        showAlert("Törlési hiba", typeof data.detail === "string" ? data.detail : "A kód nem törölhető.");
+        return;
+      }
+      await load();
+    } catch { showAlert("Törlési hiba", "Nem sikerült elérni a szervert."); }
   };
   if (!user?.is_admin) {
     return (
@@ -188,8 +187,8 @@ function EditorModal({
       return;
     }
     setBusy(true);
-    const url = item ? `/api/admin/codes/${code}` : "/api/admin/codes";
-    const method = item ? "PUT" : "POST";
+    const url = "/api/admin/codes";
+    const method = "POST";
     const aVal = parseInt(code[0], 10);
     const pVal = parseInt(code[1], 10);
     const hVal = parseInt(code[2], 10);

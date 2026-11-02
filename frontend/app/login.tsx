@@ -1,7 +1,7 @@
+import { showAlert } from "@/src/utils/dialog";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -29,7 +29,8 @@ type Mode = "login" | "mfa" | "forgot" | "reset";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, verifyMfa } = useAuth();
+  const { login, verifyMfa, verifyTotp } = useAuth();
+  const [totpRequired, setTotpRequired] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,13 +51,22 @@ export default function LoginScreen() {
 
   const submit = async () => {
     setError(null);
+    setTotpRequired(false);
+    setMfaChallengeId("");
+    setMfaCode("");
+    setMfaIsAdmin(false);
     if (!email.trim() || !password) {
       setError("Add meg az email címedet és a jelszavad.");
       return;
     }
     setBusy(true);
-    const r = await login(email.trim(), password);
+    const r = await login(email.trim(), password).catch(() => ({ ok: false, error: "Hálózati hiba. Próbáld újra." } as import("@/src/auth/AuthContext").AuthResult));
     setBusy(false);
+    if (r.totpRequired) {
+      setTotpRequired(true);
+      setMode("mfa");
+      return;
+    }
     if (r.mfaRequired && r.challengeId) {
       setMfaChallengeId(r.challengeId);
       setMfaIsAdmin(!!r.isAdmin);
@@ -71,12 +81,15 @@ export default function LoginScreen() {
 
   const submitMfa = async () => {
     setError(null);
-    if (!mfaChallengeId || !mfaCode.trim()) {
+    if ((!totpRequired && !mfaChallengeId) || !mfaCode.trim()) {
       setError("Add meg az emailben kapott biztonsági kódot.");
       return;
     }
     setBusy(true);
-    const r = await verifyMfa(mfaChallengeId, mfaCode.trim(), mfaIsAdmin ? false : rememberDevice);
+    const r = await (totpRequired
+      ? verifyTotp(email.trim(), password, mfaCode.trim())
+      : verifyMfa(mfaChallengeId, mfaCode.trim(), mfaIsAdmin ? false : rememberDevice)
+    ).catch(() => ({ ok: false, error: "Hálózati hiba. Próbáld újra." }));
     setBusy(false);
     if (!r.ok) setError(r.error || "Nem sikerült ellenőrizni a biztonsági kódot.");
     else router.replace("/");
@@ -99,7 +112,7 @@ export default function LoginScreen() {
         body: JSON.stringify({ email: trimmedEmail }),
       });
       if (r.ok) {
-        Alert.alert("Kód elküldve", "Ha az email cím létezik a rendszerben, elküldtük rá a 6 jegyű biztonsági kódot.");
+        showAlert("Kód elküldve", "Ha az email cím létezik a rendszerben, elküldtük rá a 6 jegyű biztonsági kódot.");
         setMode("reset");
       } else {
         const d = await r.json().catch(() => ({}));
@@ -142,7 +155,7 @@ export default function LoginScreen() {
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok && data.ok) {
-        Alert.alert("Jelszó módosítva", "Az új jelszavad érvénybe lépett.");
+        showAlert("Jelszó módosítva", "Az új jelszavad érvénybe lépett.");
         setMode("login");
         setPassword("");
         setResetCode("");
@@ -162,7 +175,7 @@ export default function LoginScreen() {
     mode === "login"
       ? "Mérés- és interakcióalapú mentálhigiénés alkalmazás."
       : mode === "mfa"
-        ? "Add meg az emailben kapott biztonsági kódot."
+        ? (totpRequired ? "Add meg a hitelesítő alkalmazás hatjegyű kódját." : "Add meg az emailben kapott biztonsági kódot.")
         : mode === "forgot"
           ? "Biztonsági kódot küldünk a jelszó visszaállításához."
           : "Írd be az emailben kapott kódot és az új jelszavad.";

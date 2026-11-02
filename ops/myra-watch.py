@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import base64
+import glob
 import hashlib
 import json
 import os
@@ -28,6 +29,8 @@ BACKEND_KONTENER = os.environ.get("MYRA_BACKEND_KONTENER", "myra-backend")
 DB_KONTENER = os.environ.get("MYRA_DB_KONTENER", "myra-db")
 
 ALAPVONAL_FAJL = os.path.join(OPS_DIR, "integritas.json")
+VEZERLES_DIR = os.environ.get("MYRA_CONTROL_DIR", os.path.join(MYRA_DIR, "control"))
+LEALLITAS_FAJL = os.path.join(VEZERLES_DIR, "stop-backend")
 SZUNET_FAJL = os.path.join(OPS_DIR, "karanten-szunet")
 MENTES_FAJL = os.path.join(OPS_DIR, "mentes-fut")
 
@@ -62,13 +65,18 @@ UNIT_FAJL = os.environ.get(
     "MYRA_WATCH_UNIT", "/etc/systemd/system/myra-watch.service"
 )
 VEDETT_FAJLOK = [
-    os.path.join(MYRA_DIR, "backend", "server.py"),
+    *sorted(glob.glob(os.path.join(MYRA_DIR, "backend", "*.py"))),
+    os.path.join(MYRA_DIR, "backend", "Dockerfile"),
+    os.path.join(MYRA_DIR, "backend", "requirements.txt"),
+    os.path.join(MYRA_DIR, "backend", "seed", "state_codes.json"),
     os.path.join(MYRA_DIR, ".env"),
     os.path.join(MYRA_DIR, "docker-compose.yml"),
     os.path.join(MYRA_DIR, "docker-compose.override.yml"),
     os.path.join(OPS_DIR, "myra-watch.py"),
     os.path.join(OPS_DIR, "myra-stats.py"),
     os.path.join(OPS_DIR, "myra-backup.sh"),
+    os.path.join(OPS_DIR, "myra-deploy.py"),
+    os.path.join(OPS_DIR, "publish_frontend.py"),
     "/etc/caddy/Caddyfile",
     "/etc/caddy/myra.env",
     "/etc/fail2ban/jail.d/myra.conf",
@@ -139,9 +147,6 @@ def _env_beolvas(utvonal):
 ENV = _env_beolvas(ENV_FAJL)
 
 
-
-
-
 SMTP_HOST = ENV.get("MYRA_SMTP_HOST_LOCAL") or ENV.get("MYRA_SMTP_HOST") or "smtp.protonmail.ch"
 try:
     SMTP_PORT = int(ENV.get("MYRA_SMTP_PORT_LOCAL") or ENV.get("MYRA_SMTP_PORT") or 587)
@@ -184,10 +189,10 @@ def _pg_adatok():
     return user, db
 
 
-PG_USER, PG_DB = _pg_adatok() if os.environ.get("MYRA_DB_MOD", "supabase").strip().lower() == "docker" else ("myra", "myra")
+PG_USER, PG_DB = _pg_adatok() if os.environ.get("MYRA_DB_MOD", "docker").strip().lower() == "docker" else ("myra", "myra")
 
 
-DB_MOD = os.environ.get("MYRA_DB_MOD", "supabase").strip().lower()
+DB_MOD = os.environ.get("MYRA_DB_MOD", "docker").strip().lower()
 
 
 def _supabase_kapcsolat():
@@ -197,7 +202,10 @@ def _supabase_kapcsolat():
         return None, None
     u = urlparse(nyers.replace("postgresql+asyncpg://", "postgresql://"))
     adatbazis = (u.path or "/postgres").lstrip("/") or "postgres"
-    sslmode = ENV.get("DATABASE_SSL_MODE", "") or "require"
+    if ENV.get("DATABASE_SSL", "true").strip().lower() in {"0", "false", "no", "off"}:
+        sslmode = "disable"
+    else:
+        sslmode = ENV.get("DATABASE_SSL_MODE", "") or "verify-full"
     conninfo = (
         f"host={u.hostname} port={u.port or 5432} dbname={adatbazis} "
         f"user={unquote(u.username or '')} sslmode={sslmode} connect_timeout=10"
@@ -221,7 +229,6 @@ def most():
 
 
 def _tls_context():
-    """TLS-kontextus. A Bridge önaláírt tanúsítványánál az ellenőrzés kikapcsol."""
     ctx = ssl.create_default_context()
     if not SMTP_TLS_VERIFY:
         ctx.check_hostname = False
@@ -243,7 +250,7 @@ def email_kuld(targy, torzs):
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.send_message(msg)
         return True
-    except Exception as e:  # noqa: BLE001 - a figyelo sosem allhat le email hiba miatt
+    except Exception as e:  # noqa: BLE001
         print(f"[watch] Email kuldes sikertelen: {e}", file=sys.stderr)
         return False
 
@@ -438,17 +445,20 @@ def szunet_allit(perc):
         perc = 0
     perc = max(0, min(perc, SZUNET_MAX_PERC))
     os.makedirs(OPS_DIR, exist_ok=True)
-    with open(SZUNET_FAJL, "w", encoding="utf-8") as f:
-        f.write(str(time.time() + perc * 60))
+
+    def _fajl_ir():
+        with open(SZUNET_FAJL, "w", encoding="utf-8") as f:
+            f.write(str(time.time() + perc * 60))
+
     if perc > 0:
+        _fajl_ir()
         print(f"[watch] Karanten felfuggesztve {perc} percre (max {SZUNET_MAX_PERC}).")
+        _esemeny("szunet", f"karanten-szunet: {perc} perc", "", "warn", None)
     else:
+        _esemeny("szunet", "karanten-szunet vege", "", "warn", None)
+        time.sleep(5)
+        _fajl_ir()
         print("[watch] Karanten-szunet vege.")
-    _esemeny(
-        "szunet",
-        f"karanten-szunet: {perc} perc" if perc > 0 else "karanten-szunet vege",
-        "", "warn", None,
-    )
 
 
 def mentes_folyamatban():
@@ -548,6 +558,32 @@ def _integritas_ciklus():
                     "azonnal",
                 )
             alapvonal[utvonal] = uj
+
+
+def vezerles_feldolgoz():
+    try:
+        os.remove(LEALLITAS_FAJL)
+    except FileNotFoundError:
+        return False
+    except OSError as e:
+        print(f"[watch] Vezerlo fajl nem torolheto: {e}", file=sys.stderr)
+        return False
+    try:
+        p = subprocess.run(
+            ["docker", "stop", BACKEND_KONTENER],
+            capture_output=True, text=True, timeout=120,
+        )
+        reszlet = (p.stderr or p.stdout or "").strip()[:300]
+    except Exception as e:  # noqa: BLE001
+        reszlet = f"hiba: {e}"
+    _esemeny("vezerles", "admin leallitotta a backendet", reszlet, "warn", None)
+    return True
+
+
+def _vezerles_ciklus():
+    while True:
+        time.sleep(5)
+        vezerles_feldolgoz()
 
 
 SOR = queue.Queue(maxsize=5000)
@@ -808,6 +844,7 @@ def main():
     ).start()
 
     threading.Thread(target=_integritas_ciklus, daemon=True).start()
+    threading.Thread(target=_vezerles_ciklus, daemon=True).start()
 
     fociklus()
 

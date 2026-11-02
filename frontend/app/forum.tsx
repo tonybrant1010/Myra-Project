@@ -1,3 +1,4 @@
+import { showAlert } from "@/src/utils/dialog";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
@@ -113,7 +114,7 @@ export default function ForumScreen() {
   const handleSetupSave = async () => {
     const nick = nickname.trim();
     if (!nick) {
-      Alert.alert("Hiba", "Kérlek, adj meg egy becenevet!");
+      showAlert("Hiba", "Kérlek, adj meg egy becenevet!");
       return;
     }
     setSetupBusy(true);
@@ -128,7 +129,7 @@ export default function ForumScreen() {
         loadPosts();
       } else {
         const data = await r.json().catch(() => ({}));
-        Alert.alert("Hiba", data.detail || "Mentés sikertelen.");
+        showAlert("Hiba", data.detail || "Mentés sikertelen.");
       }
     } finally {
       setSetupBusy(false);
@@ -153,7 +154,7 @@ export default function ForumScreen() {
         scrollToBottom();
       } else {
         const data = await r.json().catch(() => ({}));
-        Alert.alert("Hiba", data.detail || "Küldés sikertelen.");
+        showAlert("Hiba", data.detail || "Küldés sikertelen.");
       }
     } finally {
       setSendBusy(false);
@@ -166,7 +167,7 @@ export default function ForumScreen() {
         if (r.ok) {
           setPosts((prev) => prev.filter((p) => p.id !== postId));
         } else {
-          Alert.alert("Hiba", "Törlés sikertelen.");
+          showAlert("Hiba", "Törlés sikertelen.");
         }
       });
     };

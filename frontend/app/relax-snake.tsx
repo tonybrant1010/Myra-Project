@@ -1,12 +1,13 @@
+import { useGameBoardSize } from "@/src/utils/useGameBoardSize";
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, TouchableOpacity, Dimensions, Vibration } from "react-native";
+import { StyleSheet, View, TouchableOpacity, ScrollView, Vibration } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { authedFetch, useAuth } from "@/src/auth/AuthContext";
-import { startLeaderboardSession } from "@/src/utils/crypto";
+import { startLeaderboardSession, seededRandom } from "@/src/utils/crypto";
 
 import ContentBackground from "@/src/components/ContentBackground";
 import TopBar from "@/src/components/TopBar";
@@ -14,15 +15,14 @@ import { T } from "@/src/components/Typography";
 import { shadow, theme, radii, spacing } from "@/src/theme";
 
 const GRID_SIZE = 12;
-const { width } = Dimensions.get("window");
 const BOARD_PADDING = 12;
-const BOARD_SIZE = width - 32;
-const CELL_SIZE = Math.floor((BOARD_SIZE - BOARD_PADDING * 2) / GRID_SIZE);
 
 type Coord = { x: number; y: number };
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 
 export default function RelaxSnakeScreen() {
+  const boardSize = useGameBoardSize(420);
+  const cellSize = Math.floor((boardSize - BOARD_PADDING * 2) / GRID_SIZE);
   const { token } = useAuth();
 
 
@@ -32,7 +32,6 @@ export default function RelaxSnakeScreen() {
     { x: 6, y: 8 },
   ]);
   const [food, setFood] = useState<Coord>({ x: 6, y: 3 });
-  const [direction, setDirection] = useState<Direction>("UP");
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -42,6 +41,10 @@ export default function RelaxSnakeScreen() {
   const directionRef = useRef<Direction>("UP");
   const lastDirectionRef = useRef<Direction>("UP");
   const sessionTokenRef = useRef<string | null>(null);
+  const randomRef = useRef(Math.random);
+  const proofRef = useRef<Direction[]>([]);
+  const generationRef = useRef(0);
+  const moveSnakeRef = useRef<() => void>(() => {});
 
 
   useEffect(() => {
@@ -75,20 +78,24 @@ export default function RelaxSnakeScreen() {
     };
 
     const interval = setInterval(() => {
-      moveSnake();
+      moveSnakeRef.current();
     }, getSpeedInterval(speed));
 
     return () => clearInterval(interval);
-  }, [isRunning, gameOver, snake, direction, speed]);
+  }, [isRunning, gameOver, speed]);
 
 
   const generateFood = (currentSnake: Coord[]): Coord => {
+    if (currentSnake.length >= GRID_SIZE * GRID_SIZE) {
+      triggerGameOver(score + 10);
+      return { x: -1, y: -1 };
+    }
     let newFood: Coord;
     let isOnSnake = true;
     while (isOnSnake) {
       newFood = {
-        x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE),
+        x: Math.floor(randomRef.current() * GRID_SIZE),
+        y: Math.floor(randomRef.current() * GRID_SIZE),
       };
       isOnSnake = currentSnake.some((segment) => segment.x === newFood.x && segment.y === newFood.y);
     }
@@ -98,6 +105,7 @@ export default function RelaxSnakeScreen() {
   const moveSnake = () => {
     const head = snake[0];
     const currentDirection = directionRef.current;
+    proofRef.current.push(currentDirection);
     lastDirectionRef.current = currentDirection;
 
     let newHead: Coord;
@@ -123,7 +131,8 @@ export default function RelaxSnakeScreen() {
     }
 
 
-    const hitSelf = snake.some((segment) => segment.x === newHead.x && segment.y === newHead.y);
+    const growing = newHead.x === food.x && newHead.y === food.y;
+    const hitSelf = (growing ? snake : snake.slice(0, -1)).some((segment) => segment.x === newHead.x && segment.y === newHead.y);
     if (hitSelf) {
       triggerGameOver();
       return;
@@ -149,7 +158,7 @@ export default function RelaxSnakeScreen() {
     setSnake(newSnake);
   };
 
-  const triggerGameOver = () => {
+  const triggerGameOver = (finalScore = score) => {
     setIsRunning(false);
     setGameOver(true);
     if (token && sessionTokenRef.current) {
@@ -158,7 +167,8 @@ export default function RelaxSnakeScreen() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           game_type: "snake",
-          score,
+          score: finalScore,
+          game_proof: { moves: proofRef.current },
           session_token: sessionTokenRef.current,
         }),
       }).catch(() => {});
@@ -178,14 +188,19 @@ export default function RelaxSnakeScreen() {
     if (newDir === "LEFT" && lastDir === "RIGHT") return;
     if (newDir === "RIGHT" && lastDir === "LEFT") return;
 
-    setDirection(newDir);
     directionRef.current = newDir;
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch {}
   };
 
-  const startNewGame = () => {
+  const startNewGame = async () => {
+    const generation = ++generationRef.current;
+    setIsRunning(false);
+    const session = await startLeaderboardSession(token, "snake");
+    if (generation !== generationRef.current) return;
+    randomRef.current = session ? seededRandom(session.challenge.seed) : Math.random;
+    proofRef.current = [];
     const initialSnake = [
       { x: 6, y: 6 },
       { x: 6, y: 7 },
@@ -193,18 +208,12 @@ export default function RelaxSnakeScreen() {
     ];
     setSnake(initialSnake);
     setFood({ x: 6, y: 3 });
-    setDirection("UP");
     directionRef.current = "UP";
     lastDirectionRef.current = "UP";
     setScore(0);
     setGameOver(false);
     setIsRunning(true);
-    sessionTokenRef.current = null;
-    if (token) {
-      startLeaderboardSession(token, "snake").then((sessionToken) => {
-        sessionTokenRef.current = sessionToken;
-      });
-    }
+    sessionTokenRef.current = session?.session_token ?? null;
   };
 
   const resetToStartScreen = () => {
@@ -215,7 +224,6 @@ export default function RelaxSnakeScreen() {
     ];
     setSnake(initialSnake);
     setFood({ x: 6, y: 3 });
-    setDirection("UP");
     directionRef.current = "UP";
     lastDirectionRef.current = "UP";
     setScore(0);
@@ -227,7 +235,7 @@ export default function RelaxSnakeScreen() {
   };
 
   const toggleGame = () => {
-    if (gameOver) {
+    if (gameOver || (!isRunning && !sessionTokenRef.current)) {
       startNewGame();
     } else {
       setIsRunning((prev) => !prev);
@@ -237,11 +245,13 @@ export default function RelaxSnakeScreen() {
     }
   };
 
+  useEffect(() => { moveSnakeRef.current = moveSnake; });
+
   return (
     <SafeAreaView style={styles.safe} testID="relax-snake-screen">
       <ContentBackground>
         <TopBar title="Kígyó Játék" showBack={true} backPath="/relax" />
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
 
           <View style={styles.statsPanel}>
             <LinearGradient
@@ -268,7 +278,7 @@ export default function RelaxSnakeScreen() {
 
           <LinearGradient
             colors={["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.02)"]}
-            style={[styles.boardWrap, shadow.card]}
+            style={[styles.boardWrap, shadow.card, { width: boardSize, height: boardSize }]}
           >
 
             {Array(GRID_SIZE)
@@ -287,6 +297,7 @@ export default function RelaxSnakeScreen() {
                           key={`cell-${r}-${c}`}
                           style={[
                             styles.cell,
+                          { width: cellSize, height: cellSize },
                             isHead && styles.cellHead,
                             isBody && styles.cellBody,
                           ]}
@@ -431,7 +442,7 @@ export default function RelaxSnakeScreen() {
               <View style={styles.dpadCell} />
             </View>
           </View>
-        </View>
+        </ScrollView>
       </ContentBackground>
     </SafeAreaView>
   );
@@ -443,7 +454,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.bg,
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: spacing.md,
     alignItems: "center",
   },
@@ -469,8 +480,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   boardWrap: {
-    width: BOARD_SIZE,
-    height: BOARD_SIZE,
+    flexShrink: 0,
     padding: BOARD_PADDING,
     borderRadius: radii.lg,
     backgroundColor: "rgba(255,255,255,0.03)",
@@ -485,8 +495,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   cell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
     justifyContent: "center",
     alignItems: "center",
     borderColor: "rgba(255,255,255,0.015)",
@@ -504,8 +512,8 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.88 }],
   },
   foodEmoji: {
-    fontSize: CELL_SIZE - 2,
-    lineHeight: CELL_SIZE,
+    fontSize: 20,
+    lineHeight: 24,
   },
   overlay: {
     position: "absolute",

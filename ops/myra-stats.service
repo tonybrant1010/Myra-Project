@@ -4,7 +4,6 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-User=myra-admin
+User=<user>
 Nice=10
-EnvironmentFile=/etc/myra/ops.env
-ExecStart=${MYRA_DIR}/ops/myra-stats.py
+ExecStart=/usr/bin/python3 /srv/backend/myra/ops/myra-stats.py

@@ -7,6 +7,10 @@ krízisjelzés.
 
 ![Myra Project](assets/readme/login.png)
 
+A nyilvános repó a futtatható alkalmazásvázat és konfigurációs mintákat tartalmazza.
+Az éles adatok, titkok, mentések, modellfájlok, tudásbázis és belső dokumentumok
+nem részei. A teljes éles infrastruktúra és annak védelmi beállításai külön kezeltek.
+
 ## Architektúra
 
 ```
@@ -40,6 +44,11 @@ Proxy nélküli helyi futtatásnál a `TRUST_PROXY` maradjon `false`. A GDPR tá
 
 Minden beállítás a `.env`-ben van; a `.env.example` a sablon. Titkot (kulcs, jelszó,
 token) **soha** ne commitolj — a `.gitignore` és a `.env.example` ezt hivatott védeni.
+
+Az `ops/` systemd-fájljai és az `ops/llm/models.ini` telepítési minták:
+a `<user>` helykitöltőt, az útvonalakat és a hálózati címeket a saját környezethez
+kell igazítani. A mentés helyi modellpresetje a `MYRA_LLM_PRESET` változóval állítható;
+alapértéke a mentést futtató felhasználó `$HOME/llm/models.ini` fájlja.
 
 ## Biztonság
 

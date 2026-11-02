@@ -13,10 +13,10 @@ async function run() {
 
     const sharpPath = path.join(__dirname, "../node_modules/sharp");
     sharp = require(sharpPath);
-  } catch (e) {
+  } catch {
     try {
       sharp = require("sharp");
-    } catch (e2) {
+    } catch {
       console.error("sharp nincs telepítve. Futtasd: npm install sharp --save-dev");
       process.exit(1);
     }

@@ -20,7 +20,7 @@ type Section = { id: string; title: string; intro: string; scale: ScaleOpt[]; qu
 export default function QuizScreen() {
   useAuthGuard();
   const router = useRouter();
-  const { token, setUserLocal } = useAuth();
+  const { token, setUserLocal, refreshUser } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +99,7 @@ export default function QuizScreen() {
         return;
       }
       setUserLocal((u) => (u ? { ...u, state_code: data.code } : u));
+      await refreshUser();
       router.replace({ pathname: "/quiz-result", params: { code: data.code } });
     } catch (e: any) {
       setError(e?.message || "Hálózati hiba.");

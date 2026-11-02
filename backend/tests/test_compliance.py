@@ -21,8 +21,8 @@ async def auth_headers(client):
         "name": "Compliance Teszt",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp.status_code == 200, f"Regisztráció sikertelen: {resp.text}"
     token = resp.json()["access_token"]
@@ -170,3 +170,40 @@ async def test_consent_invalid_type_rejected(client, auth_headers):
         headers=auth_headers,
     )
     assert resp.status_code in (400, 422), f"Várt 400 vagy 422, kapott: {resp.status_code}"
+
+
+@pytest.mark.anyio
+async def test_register_rejects_stale_legal_versions(client):
+    import server
+
+    payload = {
+        "email": _unique_email(),
+        "name": "Regi Felulet",
+        "password": TEST_PASSWORD,
+        "accepted_terms": True,
+        "accepted_terms_version": server.LEGAL_TERMS_VERSION,
+        "accepted_privacy_version": "2026-10-13",
+    }
+    resp = await client.post("/api/auth/register", json=payload)
+    assert resp.status_code == 409
+
+    payload["accepted_privacy_version"] = server.LEGAL_PRIVACY_VERSION
+    resp = await client.post("/api/auth/register", json=payload)
+    assert resp.status_code == 200, resp.text
+
+
+@pytest.mark.anyio
+async def test_register_records_current_versions_when_client_omits_them(client):
+    import server
+    from sqlalchemy import select
+    from conftest import TestingSessionLocal
+
+    email = _unique_email()
+    resp = await client.post("/api/auth/register", json={
+        "email": email, "name": "Verzio Nelkul", "password": TEST_PASSWORD, "accepted_terms": True,
+    })
+    assert resp.status_code == 200, resp.text
+    async with TestingSessionLocal() as db:
+        user = (await db.execute(select(server.User).where(server.User.email == email))).scalar_one()
+    assert user.privacy_version == server.LEGAL_PRIVACY_VERSION
+    assert user.terms_version == server.LEGAL_TERMS_VERSION

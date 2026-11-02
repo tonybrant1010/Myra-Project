@@ -65,4 +65,4 @@ export class Storage extends StorageBase {
 export const storage = new Storage();
 
 
-type _NoExtras = AssertNoExtras<Exclude<keyof Storage, keyof StorageBase>>;
+export type StorageContractCheck = AssertNoExtras<Exclude<keyof Storage, keyof StorageBase>>;

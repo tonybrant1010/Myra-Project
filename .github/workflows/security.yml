@@ -89,8 +89,6 @@ jobs:
           problems = []
           for dep in data.get("dependencies", []):
               for vuln in dep.get("vulns") or []:
-                  if dep.get("name", "").lower() == "pillow":
-                      continue
                   problems.append(f'{dep["name"]} {dep.get("version", "?")} {vuln.get("id")}')
 
           if problems:
@@ -170,10 +168,18 @@ jobs:
       - name: ESLint
         run: npm run lint
 
-      - name: npm audit (production deps, critical gate)
+      - name: npm audit (production deps, high gate)
         run: npm run audit:ci
 
       - name: npm audit report (high+, informational)
         if: always()
         continue-on-error: true
         run: npm run audit:high
+
+  postgres-integration:
+    name: Isolated PostgreSQL and vector integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify fresh startup, legacy migration and concurrent auth
+        run: bash ops/verify-isolated.sh

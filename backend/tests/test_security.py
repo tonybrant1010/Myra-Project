@@ -13,13 +13,10 @@ from server import (
     _call_llm,
     _hash_reset_token,
     _cleanup_piper_cache,
-    _diagnostic_file_status,
     _prune_rate_limit_map,
     _safe_upload_filename,
     _sanitize_log_line,
-    _secret_preview,
     SecretRedactionFilter,
-    _clean_session_id,
     app,
     hash_password,
     _is_allowed_cors_origin,
@@ -27,8 +24,6 @@ from server import (
     _request_body_limit,
     require_admin,
     _should_no_store_response,
-    _safe_kb_pdf_filename,
-    _safe_download_filename,
     _validate_pdf_bytes,
     ChangePasswordBody,
     ChatSendBody,
@@ -48,9 +43,11 @@ from server import (
     HTTPException,
 )
 
+
 @pytest.fixture
 def anyio_backend():
     return "asyncio"
+
 
 def test_client_ip_no_trust_proxy():
     if "TRUST_PROXY" in os.environ:
@@ -63,6 +60,7 @@ def test_client_ip_no_trust_proxy():
 
     assert _client_ip(mock_request) == "127.0.0.1"
 
+
 def test_client_ip_with_trust_proxy_true():
     os.environ["TRUST_PROXY"] = "true"
     try:
@@ -74,6 +72,7 @@ def test_client_ip_with_trust_proxy_true():
         assert _client_ip(mock_request) == "1.2.3.4"
     finally:
         del os.environ["TRUST_PROXY"]
+
 
 def test_client_ip_with_trust_proxy_false():
     os.environ["TRUST_PROXY"] = "false"
@@ -154,32 +153,6 @@ def test_safe_upload_filename_rejects_control_chars_and_oversized_names():
     assert exc_info.value.status_code == 400
 
 
-def test_safe_kb_pdf_filename_uses_strict_pdf_rules():
-    assert _safe_kb_pdf_filename("ESV_modell_HUN.pdf") == "ESV_modell_HUN.pdf"
-    assert _safe_kb_pdf_filename("ESV_modell_HUN.PDF") == "ESV_modell_HUN.PDF"
-
-    for bad_name in ("../evil.pdf", ".hidden.pdf", "notes.txt", "bad\nname.pdf", "x" * 181 + ".pdf"):
-        with pytest.raises(HTTPException):
-            _safe_kb_pdf_filename(bad_name)
-
-
-def test_clean_session_id_rejects_unsafe_values():
-    assert _clean_session_id(None) is None
-    assert _clean_session_id("") is None
-    assert _clean_session_id(" session-1234 ") == "session-1234"
-    assert _clean_session_id("abc_DEF-123") == "abc_DEF-123"
-
-    for bad_value in ("../x", "x/y", "x y", "x.y", "a" * 41):
-        with pytest.raises(HTTPException):
-            _clean_session_id(bad_value)
-
-
-def test_safe_download_filename_strips_unsafe_header_characters():
-    assert _safe_download_filename("../Test User\r\nX-Bad: 1.csv") == "Test_User_X-Bad_1.csv"
-    assert _safe_download_filename("...") == "download"
-    assert _safe_download_filename("a" * 200 + ".csv") == "a" * 120
-
-
 def test_rag_search_query_stays_compact_for_short_message():
     state = StateCode(
         code="RAGT",
@@ -236,15 +209,6 @@ def test_fastembed_embedding_cache_reuses_normalized_query():
         server_module._fastembed_model = previous_model
 
 
-def test_diagnostic_file_status_does_not_leak_local_paths(tmp_path):
-    missing = tmp_path / "private" / "secret" / "piper.exe"
-
-    status = _diagnostic_file_status(missing, "piper binary")
-
-    assert status == "error: piper binary not found"
-    assert str(tmp_path) not in status
-
-
 def test_cleanup_piper_cache_removes_stale_wav_and_tmp_files(tmp_path):
     old_wav = tmp_path / "old.wav"
     old_tmp = tmp_path / "old.tmp.wav"
@@ -272,8 +236,6 @@ def test_validate_pdf_bytes_checks_magic_header():
         _validate_pdf_bytes(b"not really a pdf")
 
     assert exc_info.value.status_code == 400
-
-
 
 
 FAKE_GEMINI_KEY = "AIza" + "Sy" + "A" * 33
@@ -332,13 +294,6 @@ def test_secret_redaction_filter_masks_handler_output():
 
     assert FAKE_GEMINI_KEY not in output
     assert "[redacted]" in output
-
-
-def test_secret_preview_only_exposes_suffix():
-    assert _secret_preview("") == ""
-    assert _secret_preview("abcd") == "****"
-    assert _secret_preview("sk-proj-1234567890") == "****7890"
-    assert "sk-proj" not in _secret_preview("sk-proj-1234567890")
 
 
 def test_http_client_success_logs_are_not_info_level():
@@ -530,6 +485,7 @@ async def test_emergency_admin_routes_reject_wrong_current_password(init_db):
             ("/api/admin/force-logout-all", {"current_password": "wrong-password"}),
             ("/api/admin/restart", {"current_password": "wrong-password"}),
             ("/api/admin/down", {"current_password": "wrong-password"}),
+            ("/api/admin/backup", {"current_password": "wrong-password"}),
         ]
         for path, payload in routes:
             r = client.post(path, json=payload)
@@ -598,6 +554,7 @@ def test_state_code_schema_rejects_oversized_profile_fields():
     with pytest.raises(Exception):
         StateCodeIn(code="1111", title="T", profile="P", severity="", c=5)
 
+
 @pytest.mark.anyio
 @patch("httpx.AsyncClient.post")
 async def test_call_llm_anthropic_error_masking(mock_post):
@@ -621,6 +578,7 @@ async def test_call_llm_anthropic_error_masking(mock_post):
     assert "expired" not in exc_info.value.detail
     assert "Anthropic API hiba történt" in exc_info.value.detail
 
+
 @pytest.mark.anyio
 @patch("httpx.AsyncClient.post")
 async def test_call_llm_gemini_error_masking(mock_post):
@@ -642,6 +600,7 @@ async def test_call_llm_gemini_error_masking(mock_post):
     assert exc_info.value.status_code == 502
     assert "quota" not in exc_info.value.detail
     assert "Gemini API hiba" in exc_info.value.detail
+
 
 def test_verify_proxy_secret_middleware():
     from fastapi.testclient import TestClient
@@ -731,3 +690,35 @@ async def test_require_admin_logs_structured_signal_only_for_authenticated_user(
         returned = await server.require_admin(_FakeRequest(), _Admin())
     assert returned is not None
     assert "MYRA_SECURITY_SIGNAL" not in caplog.text
+
+
+@pytest.mark.anyio
+async def test_admin_down_only_writes_stop_request(init_db, tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+    import server
+    from server import app, require_admin, User, hash_password
+    from conftest import TestingSessionLocal
+
+    admin = User(
+        id=991,
+        email="admin-down@example.com",
+        name="Admin",
+        password_hash=hash_password("correct-password"),
+        is_admin=True,
+        is_active=True,
+    )
+    async with TestingSessionLocal() as db:
+        db.add(admin)
+        await db.commit()
+        db.expunge(admin)
+
+    monkeypatch.setattr(server, "CONTROL_DIR", tmp_path)
+    monkeypatch.setenv("ENVIRONMENT", "development")
+    app.dependency_overrides[require_admin] = lambda: admin
+    try:
+        r = TestClient(app).post("/api/admin/down", json={"current_password": "correct-password"})
+    finally:
+        app.dependency_overrides.pop(require_admin, None)
+    assert r.status_code == 200
+    assert (tmp_path / "stop-backend").is_file()
+    assert not hasattr(server, "DOCKER_SOCKET_PROXY_URL")

@@ -349,7 +349,7 @@ export default function ChatScreen() {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, finishReveal]);
 
   useEffect(() => {
     if (viewSessionId !== null && viewSessionId !== undefined) {
@@ -600,21 +600,7 @@ export default function ChatScreen() {
     setMessages((m) => [...m, optimistic]);
     scrollToBottom(true);
 
-    const showSendError = async (status: number, detail?: string) => {
-
-
-
-      if (status >= 500) {
-        const recovered = await recoverPendingReply(activeSessionId, text);
-        if (recovered) {
-          finishReveal();
-          setMessages(recovered);
-          const lastAssistant = [...recovered].reverse().find((m) => m.role === "assistant");
-          if (lastAssistant) animateAssistantMessage(lastAssistant);
-          scrollToBottom(true);
-          return;
-        }
-      }
+    const showSendError = (detail?: string) => {
       const errorMessage: Msg = {
         id: `err-${Date.now()}`,
         role: "assistant",
@@ -661,7 +647,7 @@ export default function ChatScreen() {
       const r = await authedFetch(token, "/api/chat/send-stream", { method: "POST", body: JSON.stringify({ message: text, session_id: activeSessionId }) });
       if (!r.ok) {
         const errData = await r.json().catch(() => ({}));
-        await showSendError(r.status, errData?.detail);
+        showSendError(errData?.detail);
         return;
       }
       let data: any;
@@ -670,7 +656,7 @@ export default function ChatScreen() {
           data = await readChatStream(r, onStreamText);
         } catch (e: any) {
           if (e?.streamError) {
-            await showSendError(e.status, e.detail);
+            showSendError(e.detail);
             return;
           }
           throw e;

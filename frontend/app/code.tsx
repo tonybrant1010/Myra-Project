@@ -20,7 +20,7 @@ import ContentBackground from "@/src/components/ContentBackground";
 export default function CodeScreen() {
   useAuthGuard();
   const router = useRouter();
-  const { token, setUserLocal } = useAuth();
+  const { token, setUserLocal, refreshUser } = useAuth();
   const [digits, setDigits] = useState<string[]>(["", "", "", ""]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +63,7 @@ export default function CodeScreen() {
         return;
       }
       setUserLocal((u) => (u ? { ...u, state_code: code } : u));
+      await refreshUser();
       router.replace("/chat");
     } catch (e: any) {
       setError(e?.message || "Hiba a kód ellenőrzésekor");

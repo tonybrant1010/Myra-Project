@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { showAlert } from "@/src/utils/dialog";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -9,7 +10,6 @@ import {
   Keyboard,
   Dimensions,
   Modal,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -58,7 +58,7 @@ export default function RelaxLeaderboardScreen() {
   }, [user]);
 
 
-  const loadLeaderboard = async () => {
+  const loadLeaderboard = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     setError(null);
@@ -75,11 +75,11 @@ export default function RelaxLeaderboardScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     loadLeaderboard();
-  }, [token]);
+  }, [loadLeaderboard]);
 
   const saveNickname = async () => {
     if (!token) return;
@@ -110,27 +110,20 @@ export default function RelaxLeaderboardScreen() {
         loadLeaderboard();
       } else {
         const d = await response.json().catch(() => ({}));
-        Alert.alert("Hiba", d.detail || "Hiba történt a becenév mentésekor.");
+        showAlert("Hiba", d.detail || "Hiba történt a becenév mentésekor.");
       }
     } catch {
-      Alert.alert("Hiba", "Hálózati hiba történt.");
+      showAlert("Hiba", "Hálózati hiba történt.");
     } finally {
       setSavingNickname(false);
     }
-  };
-
-  const formatSudokuTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
   const renderLeaderboardList = (
     title: string,
     icon: keyof typeof Ionicons.glyphMap,
     color: string,
-    list: LeaderboardRow[] = [],
-    isTimeFormat = false
+    list: LeaderboardRow[] = []
   ) => {
     return (
       <LinearGradient
@@ -173,7 +166,7 @@ export default function RelaxLeaderboardScreen() {
                     </T>
                   </View>
                   <T variant="title" color={color} style={{ fontWeight: "700" }}>
-                    {isTimeFormat ? formatSudokuTime(row.score) : row.score}
+                    {row.score}
                   </T>
                 </View>
               );
@@ -337,22 +330,19 @@ export default function RelaxLeaderboardScreen() {
                 "Myra Match",
                 "grid-outline",
                 theme.accent,
-                leaderboard?.match,
-                false
+                leaderboard?.match
               )}
               {renderLeaderboardList(
                 "Klasszikus Kígyó",
                 "navigate-outline",
                 theme.success,
-                leaderboard?.snake,
-                false
+                leaderboard?.snake
               )}
               {renderLeaderboardList(
                 "Sudoku",
                 "apps-outline",
                 theme.warm,
-                leaderboard?.sudoku,
-                false
+                leaderboard?.sudoku
               )}
             </View>
           )}
@@ -532,24 +522,6 @@ const styles = StyleSheet.create({
   playerName: {
     fontWeight: "600",
     maxWidth: width - 180,
-  },
-  rankCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
-  rankGold: {
-    backgroundColor: "#FFE066",
-  },
-  rankSilver: {
-    backgroundColor: "#E6E6E6",
-  },
-  rankBronze: {
-    backgroundColor: "#CD7F32",
   },
   emptyText: {
     textAlign: "center",

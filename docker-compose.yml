@@ -1,18 +1,5 @@
 services:
 
-  docker-socket-proxy:
-    image: tecnativa/docker-socket-proxy:latest
-    container_name: myra-docker-socket-proxy
-    restart: unless-stopped
-
-    environment:
-
-      - CONTAINERS=1
-      - POST=1
-      - ALLOW_STOP=1
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
   backend:
     build:
       context: ./backend
@@ -32,8 +19,6 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      docker-socket-proxy:
-        condition: service_started
       db:
         condition: service_healthy
 
@@ -43,7 +28,7 @@ services:
       - ACCESS_TOKEN_EXPIRE_MINUTES=10080
       - DATABASE_URL=${DATABASE_URL:?DATABASE_URL must be set in .env}
       - DATABASE_SSL=${DATABASE_SSL:-true}
-      - DATABASE_SSL_MODE=${DATABASE_SSL_MODE:-require}
+      - DATABASE_SSL_MODE=${DATABASE_SSL_MODE:-verify-full}
       - ADMIN_EMAIL_ALLOWLIST=${ADMIN_EMAIL_ALLOWLIST:-}
       - TRUST_PROXY=${TRUST_PROXY:-true}
       - MYRA_PROXY_SECRET=${MYRA_PROXY_SECRET:?set in .env}
@@ -59,7 +44,6 @@ services:
       - MYRA_MAIL_FROM_NAME=${MYRA_MAIL_FROM_NAME:-Myra-project}
       - MYRA_CONTACT_EMAIL=${MYRA_CONTACT_EMAIL:-info@myra-project.hu}
       - MYRA_ALERT_EMAIL=${MYRA_ALERT_EMAIL:-}
-      - DOCKER_SOCKET_PROXY_URL=http://docker-socket-proxy:2375
 
       - CHAT_HISTORY_MAX_MESSAGES=${CHAT_HISTORY_MAX_MESSAGES:-120}
       - CHAT_HISTORY_MAX_CHARS=${CHAT_HISTORY_MAX_CHARS:-45000}
@@ -75,7 +59,7 @@ services:
     volumes:
       - ./backend/data:/app/data
       - ./control:/control
-      - ${BACKUP_HOST_DIR:-./backups}:/app/backups:ro
+      - ${BACKUP_HOST_DIR:-/srv/myra-backups/orankent}:/app/backups:ro
 
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8001/api/config').status==200 else 1)"]

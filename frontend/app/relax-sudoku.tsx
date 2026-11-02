@@ -1,5 +1,6 @@
+import { useGameBoardSize } from "@/src/utils/useGameBoardSize";
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, TouchableOpacity, Dimensions, Vibration } from "react-native";
+import { StyleSheet, View, TouchableOpacity, ScrollView, Vibration } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,9 +14,7 @@ import TopBar from "@/src/components/TopBar";
 import { T } from "@/src/components/Typography";
 import { shadow, theme, radii, spacing } from "@/src/theme";
 
-const { width } = Dimensions.get("window");
 const BOARD_PADDING = 8;
-const BOARD_SIZE = width - 32;
 
 type CellCoord = { r: number; c: number } | null;
 type SudokuSize = 4 | 6 | 9;
@@ -153,6 +152,7 @@ const checkConflicts = (currentBoard: (number | null)[][], size: SudokuSize): bo
 };
 
 export default function RelaxSudokuScreen() {
+  const gameBoardPixels = useGameBoardSize(340);
   const { token } = useAuth();
 
   const [boardSize, setBoardSize] = useState<SudokuSize>(4);
@@ -167,6 +167,7 @@ export default function RelaxSudokuScreen() {
 
   const timerRef = useRef<any>(null);
   const sessionTokenRef = useRef<string | null>(null);
+  const generationRef = useRef(0);
 
 
   useEffect(() => {
@@ -200,7 +201,7 @@ export default function RelaxSudokuScreen() {
   }, [isRunning, gameOver]);
 
 
-  const cellWidth = Math.floor((BOARD_SIZE - BOARD_PADDING * 2) / boardSize);
+  const cellWidth = Math.floor((gameBoardPixels - BOARD_PADDING * 2) / boardSize);
 
 
   let boxRows = 3;
@@ -213,8 +214,12 @@ export default function RelaxSudokuScreen() {
     boxCols = 3;
   }
 
-  const startNewGame = (size: SudokuSize) => {
-    const { puzzle } = generateSudoku(size);
+  const startNewGame = async (size: SudokuSize) => {
+    const generation = ++generationRef.current;
+    setIsRunning(false);
+    const session = await startLeaderboardSession(token, "sudoku", size);
+    if (generation !== generationRef.current) return;
+    const puzzle = session?.challenge.puzzle ?? generateSudoku(size).puzzle;
 
 
     const initBoard = puzzle.map((row) => row.map((val) => (val === 0 ? null : val)));
@@ -226,12 +231,7 @@ export default function RelaxSudokuScreen() {
     setTimer(0);
     setGameOver(false);
     setIsRunning(true);
-    sessionTokenRef.current = null;
-    if (token) {
-      startLeaderboardSession(token, "sudoku").then((sessionToken) => {
-        sessionTokenRef.current = sessionToken;
-      });
-    }
+    sessionTokenRef.current = session?.session_token ?? null;
 
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -288,6 +288,7 @@ export default function RelaxSudokuScreen() {
           body: JSON.stringify({
             game_type: "sudoku",
             score: calculatedScore,
+            game_proof: { board: newBoard },
             session_token: sessionTokenRef.current,
           }),
         }).catch(() => {});
@@ -332,9 +333,9 @@ export default function RelaxSudokuScreen() {
     <SafeAreaView style={styles.safe} testID="relax-sudoku-screen">
       <ContentBackground>
         <TopBar title="Sudoku" showBack={true} backPath="/relax" />
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
 
-          {isRunning && (
+          {(isRunning || gameOver) && (
             <View style={styles.statsPanel}>
               <LinearGradient
                 colors={["rgba(255, 255, 255, 0.08)", "rgba(255, 255, 255, 0.03)"]}
@@ -359,10 +360,10 @@ export default function RelaxSudokuScreen() {
           )}
 
 
-          {isRunning && (
+          {(isRunning || gameOver) && (
             <LinearGradient
               colors={["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.02)"]}
-              style={[styles.boardWrap, shadow.card]}
+              style={[styles.boardWrap, shadow.card, { width: gameBoardPixels, height: gameBoardPixels }]}
             >
               {playerBoard.map((row, rIdx) => (
                 <View key={`row-${rIdx}`} style={styles.boardRow}>
@@ -483,7 +484,7 @@ export default function RelaxSudokuScreen() {
           )}
 
 
-          {!isRunning && (
+          {!isRunning && !gameOver && (
             <View style={styles.startPanel}>
               <LinearGradient
                 colors={["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.02)"]}
@@ -542,7 +543,7 @@ export default function RelaxSudokuScreen() {
               </LinearGradient>
             </View>
           )}
-        </View>
+        </ScrollView>
       </ContentBackground>
     </SafeAreaView>
   );
@@ -554,7 +555,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.bg,
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: spacing.md,
     alignItems: "center",
   },
@@ -580,8 +581,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   boardWrap: {
-    width: BOARD_SIZE,
-    height: BOARD_SIZE,
+    flexShrink: 0,
     padding: BOARD_PADDING,
     borderRadius: radii.lg,
     backgroundColor: "rgba(255,255,255,0.03)",

@@ -1,6 +1,7 @@
 import os
 import sys
 import uuid
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -194,3 +195,54 @@ async def test_registration_never_returns_mfa_verified_token(client):
     token = await _register(client, email)
     payload = _jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
     assert payload.get("mfa") is False, "A regisztráció MFA-verifikált tokent adott ki"
+
+
+@pytest.mark.anyio
+async def test_new_reset_code_does_not_restore_guess_budget(client):
+    email = _unique_email()
+    await _register(client, email)
+    real_code, _stored_hash = await _issue_reset_token(client, email)
+    wrong_code = "000000" if real_code != "000000" else "111111"
+    for _ in range(5):
+        await client.post("/api/auth/reset-password", json={
+            "email": email, "token": wrong_code, "new_password": NEW_PASSWORD,
+        })
+
+    sent: list[str] = []
+    with patch.object(server, "_send_password_reset_email", lambda to, code: sent.append(code) or True):
+        resp = await client.post("/api/auth/forgot-password", json={"email": email})
+    assert resp.status_code == 200
+    assert sent == []
+    async with TestingSessionLocal() as db:
+        user = (await db.execute(select(User).where(User.email == email))).scalar_one()
+        assert user.reset_token is None
+        assert user.reset_attempts == 5
+        user.token_expires_at = server._now() - timedelta(minutes=1)
+        await db.commit()
+
+    fresh_code, _ = await _issue_reset_token(client, email)
+    resp = await client.post("/api/auth/reset-password", json={
+        "email": email, "token": fresh_code, "new_password": NEW_PASSWORD,
+    })
+    assert resp.status_code == 200, resp.text
+
+
+@pytest.mark.anyio
+async def test_reset_codes_share_one_guess_budget_per_window(client):
+    email = _unique_email()
+    await _register(client, email)
+    for _ in range(4):
+        code, _ = await _issue_reset_token(client, email)
+        wrong = "000000" if code != "000000" else "111111"
+        await client.post("/api/auth/reset-password", json={
+            "email": email, "token": wrong, "new_password": NEW_PASSWORD,
+        })
+    code, _ = await _issue_reset_token(client, email)
+    wrong = "000000" if code != "000000" else "111111"
+    await client.post("/api/auth/reset-password", json={
+        "email": email, "token": wrong, "new_password": NEW_PASSWORD,
+    })
+    resp = await client.post("/api/auth/reset-password", json={
+        "email": email, "token": code, "new_password": NEW_PASSWORD,
+    })
+    assert resp.status_code == 400

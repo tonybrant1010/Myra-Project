@@ -66,6 +66,129 @@ async def init_db():
 NORMS_H_WORST = {"a": 0.2, "p": 0.9, "h": 0.8, "c": 0.1, "v": 2}
 
 
+@pytest.mark.anyio
+@pytest.mark.parametrize("local_fails", [False, True])
+async def test_admin_local_selection_never_calls_cloud(monkeypatch, local_fails):
+    await _seed_user(991)
+    async with TestingSessionLocal() as db:
+        db.add(AppSetting(key="local_llm_enabled", value="true"))
+        db.add(AppSetting(key="local_llm_model", value="test-local"))
+        await db.commit()
+
+    async def local_reply(*args, **kwargs):
+        if local_fails:
+            raise server.HTTPException(status_code=503, detail="offline")
+        return "Értem, amit írsz. Mesélj még erről.", {"total_ms": 1}
+
+    async def forbidden_cloud(*args, **kwargs):
+        pytest.fail("Local selection must not send a cloud request")
+
+    monkeypatch.setattr(server, "_local_chat_with_guardrail", local_reply)
+    monkeypatch.setattr(server, "_call_llm", forbidden_cloud)
+    monkeypatch.setattr(server, "RAG_CHAT_CHUNKS", 0)
+    monkeypatch.setattr(server, "PROFILE_ENABLED", False)
+    monkeypatch.setattr(server, "CRISIS_ALERT_ENABLED", False)
+    monkeypatch.setattr(server, "RECALL_ENABLED", False)
+    response = TestClient(app).post("/api/chat/send", json={"message": "Ma jó napom volt."})
+    assert response.status_code == (503 if local_fails else 200), response.text
+
+
+@pytest.mark.anyio
+async def test_local_system_prompt_is_stable_and_context_goes_to_last_turn(monkeypatch):
+    await _seed_user(992)
+    async with TestingSessionLocal() as db:
+        db.add(AppSetting(key="local_llm_enabled", value="true"))
+        db.add(AppSetting(key="local_llm_model", value="test-local"))
+        await db.commit()
+
+    calls = []
+
+    async def local_reply(model, system, history, tail, timeout_s=None):
+        calls.append((system, list(history), tail))
+        return "Értem. Mesélj még erről.", {"total_ms": 1}
+
+    monkeypatch.setattr(server, "_local_chat_with_guardrail", local_reply)
+    monkeypatch.setattr(server, "RAG_CHAT_CHUNKS", 0)
+    monkeypatch.setattr(server, "PROFILE_ENABLED", False)
+    monkeypatch.setattr(server, "CRISIS_ALERT_ENABLED", False)
+    monkeypatch.setattr(server, "RECALL_ENABLED", False)
+    client = TestClient(app)
+    assert client.post("/api/chat/send", json={"message": "Első üzenet."}).status_code == 200
+    assert client.post("/api/chat/send", json={"message": "Második üzenet."}).status_code == 200
+
+    (system1, history1, tail1), (system2, history2, tail2) = calls
+    assert system1 == system2
+    assert history2[: len(history1)] == history1
+    assert history2[len(history1)] == {"role": "user", "text": tail1}
+    assert "IDŐ KONTEXTUS" not in system1
+    assert "IDŐ KONTEXTUS" in tail1 and tail1.rstrip().endswith("Első üzenet.")
+    assert tail2.rstrip().endswith("Második üzenet.")
+
+
+@pytest.mark.anyio
+async def test_local_chat_receives_uploaded_text_knowledge(monkeypatch):
+    await _seed_user(993)
+    async with TestingSessionLocal() as db:
+        db.add_all([AppSetting(key="local_llm_enabled", value="true"),
+                    AppSetting(key="local_llm_model", value="test-local"),
+                    AppSetting(key="kb_text", value="LOCAL_TEXT_KNOWLEDGE_MARKER")])
+        await db.commit()
+    captured = []
+
+    async def local_reply(model, system, history, tail, timeout_s=None):
+        captured.append(tail)
+        return "Értem.", {"total_ms": 1}
+
+    monkeypatch.setattr(server, "_local_chat_with_guardrail", local_reply)
+    monkeypatch.setattr(server, "RAG_CHAT_CHUNKS", 0)
+    monkeypatch.setattr(server, "PROFILE_ENABLED", False)
+    monkeypatch.setattr(server, "CRISIS_ALERT_ENABLED", False)
+    monkeypatch.setattr(server, "RECALL_ENABLED", False)
+    response = TestClient(app).post("/api/chat/send", json={"message": "Ma jó napom volt."})
+    assert response.status_code == 200, response.text
+    assert "LOCAL_TEXT_KNOWLEDGE_MARKER" in captured[0]
+
+
+@pytest.mark.anyio
+async def test_data_export_includes_forum_and_game_records():
+    await _seed_user(994)
+    async with TestingSessionLocal() as db:
+        owner = await db.get(User, 994)
+        owner.forum_nickname = "Export name"
+        owner.forum_avatar = "🦊"
+        db.add(server.ForumPost(user_id=994, content="Exported post"))
+        db.add(server.LeaderboardEntry(user_id=994, game_type="snake", score=10))
+        await db.commit()
+    response = TestClient(app).post("/api/user/data-export", json={"current_password": "correct-password"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["forum_posts"][0]["content"] == "Exported post"
+    assert data["game_scores"][0]["score"] == 10
+    assert "profile_memory_enabled" in data["user_profile"]
+    assert "password_hash" not in data["user_profile"]
+
+
+@pytest.mark.anyio
+async def test_local_first_attempt_streams_when_sink_is_set(monkeypatch):
+    streamed = []
+
+    async def fake_stream(model, msgs, sink, temperature=None, timeout_s=None):
+        sink("rész")
+        return "Szia, itt vagyok.", {"total_ms": 1}
+
+    async def forbidden_buffered(*args, **kwargs):
+        pytest.fail("Streaming request expected")
+
+    monkeypatch.setattr(server, "_stream_local_chat", fake_stream)
+    monkeypatch.setattr(server, "_call_local_buffered", forbidden_buffered)
+    token = server._chat_stream_sink.set(streamed.append)
+    try:
+        reply, meta = await server._local_chat_with_guardrail("m", "s", [], "t", timeout_s=30)
+    finally:
+        server._chat_stream_sink.reset(token)
+    assert reply == "Szia, itt vagyok." and streamed == ["rész"]
+
+
 async def _seed_user(user_id: int = 71, *, with_submission: bool = True, verified_days_ago: int = 1) -> None:
     now = datetime.datetime.now(datetime.timezone.utc)
     async with TestingSessionLocal() as db:
@@ -182,6 +305,63 @@ async def test_checkin_skips_without_api_key():
     r = client.post("/api/chat/checkin", headers={"Authorization": "Bearer fake-token"})
     assert r.status_code == 200
     assert r.json()["message"] is None
+
+
+@pytest.mark.anyio
+async def test_admin_memory_switch_also_disables_message_recall(monkeypatch):
+    await _seed_user(996)
+    async with TestingSessionLocal() as db:
+        owner = await db.get(User, 996)
+        owner.profile_memory_enabled = True
+        db.add(AppSetting(key="profile_memory_enabled", value="false"))
+        await db.commit()
+    app.dependency_overrides[get_current_user] = lambda: owner
+    def forbidden(*args, **kwargs):
+        pytest.fail("Global memory off must disable historical message recall")
+    async def reply(*args, **kwargs):
+        return "Itt vagyok, figyelek."
+    monkeypatch.setattr(server, "PROFILE_ENABLED", True)
+    monkeypatch.setattr(server, "RECALL_ENABLED", True)
+    monkeypatch.setattr(server, "RAG_CHAT_CHUNKS", 0)
+    monkeypatch.setattr(server, "CRISIS_ALERT_ENABLED", False)
+    monkeypatch.setattr(server, "_is_past_reference", forbidden)
+    monkeypatch.setattr(server, "_call_llm", reply)
+    response = TestClient(app).post("/api/chat/send", json={"message": "Emlékszel a korábbi beszélgetésünkre?"})
+    assert response.status_code == 200, response.text
+
+
+@pytest.mark.anyio
+async def test_checkin_uses_local_without_cloud_key(monkeypatch):
+    await _seed_user(994)
+    await _add_messages(994, "goal-session-994", [("user", 5.0), ("assistant", 5.0)])
+    async with TestingSessionLocal() as db:
+        db.add_all([AppSetting(key="local_llm_enabled", value="true"),
+                    AppSetting(key="local_llm_model", value="local-test")])
+        await db.commit()
+    calls = []
+    async def local(provider, model, key, *args):
+        calls.append((provider, model))
+        return "Hogy alakult az elmúlt néhány napod?"
+    monkeypatch.setattr(server, "_call_llm", local)
+    response = TestClient(app).post("/api/chat/checkin")
+    assert response.status_code == 200, response.text
+    assert response.json()["message"] is not None
+    assert calls == [("ollama", "local-test")]
+
+
+@pytest.mark.anyio
+async def test_crisis_judge_does_not_send_to_cloud_when_local_is_incomplete(monkeypatch):
+    await _seed_user(995)
+    async with TestingSessionLocal() as db:
+        db.add_all([AppSetting(key="local_llm_enabled", value="true"),
+                    AppSetting(key="llm_api_key", value="cloud-key")])
+        await db.commit()
+    monkeypatch.setattr(server, "SessionLocal", TestingSessionLocal)
+    async def forbidden(*args):
+        pytest.fail("Incomplete local configuration must not send a cloud request")
+    monkeypatch.setattr(server, "_call_llm_provider", forbidden)
+    level, _, _ = await server._crisis_judge("Test message")
+    assert level == ""
 
 
 @pytest.mark.anyio

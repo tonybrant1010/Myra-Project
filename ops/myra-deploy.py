@@ -93,9 +93,6 @@ def env_beolvas(utvonal):
 ENV = env_beolvas(ENV_FAJL)
 
 
-
-
-
 SMTP_HOST = ENV.get("MYRA_SMTP_HOST_LOCAL") or ENV.get("MYRA_SMTP_HOST") or "smtp.protonmail.ch"
 try:
     SMTP_PORT = int(ENV.get("MYRA_SMTP_PORT_LOCAL") or ENV.get("MYRA_SMTP_PORT") or 587)
@@ -110,7 +107,6 @@ SMTP_TLS_VERIFY = (ENV.get("MYRA_SMTP_TLS_VERIFY") or "true").strip().lower() in
 
 
 def _tls_context():
-    """TLS-kontextus. A Bridge önaláírt tanúsítványánál az ellenőrzés kikapcsol."""
     ctx = ssl.create_default_context()
     if not SMTP_TLS_VERIFY:
         ctx.check_hostname = False
@@ -219,8 +215,8 @@ def varj_healthre():
 def fustteszt():
     script = BELSO_TESZT.replace("__CHECKS__", repr(ELLENORZESEK))
     p = subprocess.run(
-        ["docker", "compose", "exec", "-T", "backend", "python", "-"],
-        cwd=MYRA_DIR, input=script, text=True,
+        ["docker", "compose", "exec", "-T", "backend", "python", "-c", script],
+        cwd=MYRA_DIR, text=True,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
     )
     print(p.stdout or "")
@@ -229,9 +225,16 @@ def fustteszt():
 
 def visszaallas():
     print("[deploy] VISSZAALLAS a mentett image-re.")
-    fut(["docker", "tag", ROLLBACK_TAG, IMAGE + ":latest"])
-    fut(["docker", "compose", "up", "-d", "--force-recreate", "backend"])
-    print("[deploy] A regi verzio elindult. A warmup ujra ~7 perc.")
+    if fut(["docker", "tag", ROLLBACK_TAG, IMAGE + ":latest"]).returncode != 0:
+        raise RuntimeError("Rollback image restoration failed")
+    if fut(["docker", "compose", "up", "-d", "--force-recreate", "backend"]).returncode != 0:
+        raise RuntimeError("Rollback container startup failed")
+    if not varj_healthre():
+        raise RuntimeError("Rollback container did not become healthy")
+    healthy, _ = fustteszt()
+    if not healthy:
+        raise RuntimeError("Rollback API verification failed")
+    print("[deploy] A regi verzio healthy es az API-ellenorzes sikeres.")
 
 
 def main():
@@ -239,7 +242,9 @@ def main():
 
     van_rollback = bool(kimenet(["docker", "images", "-q", IMAGE]))
     if van_rollback:
-        fut(["docker", "tag", IMAGE + ":latest", ROLLBACK_TAG])
+        if fut(["docker", "tag", IMAGE + ":latest", ROLLBACK_TAG]).returncode != 0:
+            print("[deploy] Rollback image could not be saved; deployment stopped.")
+            return 1
         print("[deploy] Jelenlegi image elmentve: %s" % ROLLBACK_TAG)
     else:
         print("[deploy] Nincs meglevo image, visszaallas nem lesz lehetseges.")
@@ -251,7 +256,10 @@ def main():
                    "Idopont: %s" % most())
         return 1
 
-    fut(["docker", "compose", "up", "-d", "backend"])
+    if fut(["docker", "compose", "up", "-d", "backend"]).returncode != 0:
+        if van_rollback:
+            visszaallas()
+        return 1
 
     print("[deploy] Varakozas a healthcheckre (a RAG warmup ~7 perc)...")
     if not varj_healthre():

@@ -22,8 +22,8 @@ async def registered_user(client):
         "name": "Teszt Felhasználó",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     return {
         "email": email,
@@ -48,8 +48,8 @@ async def test_register_success(client):
         "name": "Új Felhasználó",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp.status_code == 200, f"Sikertelen regisztráció: {resp.text}"
     data = resp.json()
@@ -66,8 +66,8 @@ async def test_register_without_accepted_terms_rejected(client):
         "name": "Feltétel Nélkül",
         "password": TEST_PASSWORD,
         "accepted_terms": False,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp.status_code == 400, f"Várt 400, kapott: {resp.status_code}"
 
@@ -80,8 +80,8 @@ async def test_register_duplicate_email_rejected(client):
         "name": "Első Felhasználó",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp1.status_code == 200, f"Első regisztráció sikertelen: {resp1.text}"
 
@@ -90,8 +90,8 @@ async def test_register_duplicate_email_rejected(client):
         "name": "Duplikált Felhasználó",
         "password": "AnotherPass!2026",
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp2.status_code == 400, f"Várt 400, kapott: {resp2.status_code}"
     assert "már regisztrálva" in resp2.json().get("detail", "").lower() or \
@@ -107,8 +107,8 @@ async def test_register_short_password_rejected(client):
         "name": "Rövid Jelszó",
         "password": "short",
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert resp.status_code == 422, f"Várt 422 validációs hiba, kapott: {resp.status_code}"
 
@@ -187,8 +187,8 @@ async def test_change_password_success(client):
         "name": "Jelszóváltó",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert reg_resp.status_code == 200
     token = reg_resp.json()["access_token"]
@@ -227,8 +227,8 @@ async def test_change_password_same_as_current_rejected(client):
         "name": "Ugyanaz Jelszó",
         "password": TEST_PASSWORD,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert reg_resp.status_code == 200
     token = reg_resp.json()["access_token"]
@@ -267,8 +267,8 @@ async def test_login_after_password_change(client):
         "name": "Jelszóváltás Teszt",
         "password": original_pw,
         "accepted_terms": True,
-        "accepted_terms_version": "2026-06-15",
-        "accepted_privacy_version": "2026-06-15",
+        "accepted_terms_version": "2026-11-02",
+        "accepted_privacy_version": "2026-11-02.2",
     })
     assert reg_resp.status_code == 200
     token = reg_resp.json()["access_token"]

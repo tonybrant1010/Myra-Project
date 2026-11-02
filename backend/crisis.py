@@ -1,33 +1,3 @@
-"""Krízisdetektálás és epizód-követés tiszta logikája.
-
-Szándékosan nincs benne semmilyen külső függőség (FastAPI, DB, hálózat), hogy
-önmagában tesztelhető legyen: a döntési tábla és az epizód-állapotgép az, amiben
-hiba lehet, nem a körítés.
-
-Három réteg (2026-10-18):
-  1. PREFILTER  — széles, emlékeztető szűrő. Csak azt dönti el, hogy érdemes-e
-                  a modellhez fordulni. Téves találata ártalmatlan.
-  2. ÍTÉLET     — a modell (ACUTE / ELEVATED / NONE) ÉS a trend
-                  (WORSE / SAME / BETTER / NA) az előző állapothoz képest.
-  3. PADLÓ      — determinisztikus fordulatlista. Modell nélkül is riaszt.
-
-Epizód (2026-10-18, második kör):
-  Egy krízis nem egy üzenet, hanem egy szakasz. Ezért a riasztás epizódra szól:
-    - OPEN     : megnyílik az epizód  -> 1. levél ("krízis kezdete")
-    - ESCALATE : az epizód súlyosbodik -> levél ("súlyosbodott")
-    - CLOSE    : a modell szerint javult -> 2. levél ("enyhült") + összefoglaló
-    - KEEP     : nincs változás, csak napló
-  Ha a felhasználó elhallgat, az epizód idővel lezárul (idle_timeout), és a
-  záró levél akkor is elmegy.
-
-Előzmény: a 2026-10-17-i éles esetek. Egy kamu vészhelyzet-sztori ("kiugrottam
-az ablakon, vérzik a nyakam") egyetlen fordulatot sem tartalmazott, ezért nem
-ment riasztás — miközben a modell krízisprotokollt adott. Ugyanaznap egy
-regényidézet ("azt mondta a főszereplő, hogy meg akarok halni") tévesen
-riasztott, mert a részstring-egyezés nem tesz különbséget idézet és saját
-állítás között.
-"""
-
 ACUTE = "ACUTE"
 ELEVATED = "ELEVATED"
 NONE = "NONE"
@@ -111,7 +81,6 @@ def _compact(text: str) -> str:
 
 
 def is_severe(text: str) -> bool:
-    """Padló: fix fordulat, modell nélkül is riaszt."""
     normalized = _normalize(text)
     compact = _compact(normalized)
     return (
@@ -121,13 +90,11 @@ def is_severe(text: str) -> bool:
 
 
 def prefilter_hits(text: str) -> list:
-    """Széles szűrő: a találat csak annyit jelent, hogy a modellhez érdemes fordulni."""
     normalized = _normalize(text)
     return [t for t in PREFILTER_TERMS if t in normalized]
 
 
 def parse_verdict(raw: str):
-    """A modell válaszából (szint, trend, indoklás). Ismeretlen válaszra ("", "", ok)."""
     text = (raw or "").strip()
     if not text:
         return "", "", "üres modellválasz"
@@ -151,7 +118,6 @@ def parse_verdict(raw: str):
     if not trend:
         trend = NA
 
-
     reason = " ".join(text.splitlines())
     for token in (level, trend):
         if token:
@@ -161,9 +127,8 @@ def parse_verdict(raw: str):
 
 
 class Episode:
-    """Egy krízis-epizód állapota. Csak sima adat, hogy könnyen naplózható legyen."""
 
-    __slots__ = ("opened_at", "last_event_at", "peak", "messages", "escalations", "closed_at", "notified")
+    __slots__ = ("opened_at", "last_event_at", "peak", "messages", "escalations", "notified")
 
     def __init__(self, opened_at: float):
         self.opened_at = opened_at
@@ -171,29 +136,10 @@ class Episode:
         self.peak = ACUTE
         self.messages = 1
         self.escalations = 0
-        self.closed_at = None
         self.notified = False
-
-    def as_dict(self) -> dict:
-        return {
-            "opened_at": self.opened_at,
-            "last_event_at": self.last_event_at,
-            "peak": self.peak,
-            "messages": self.messages,
-            "escalations": self.escalations,
-        }
 
 
 def step(episode, level: str, trend: str, now: float):
-    """Az epizód-állapotgép egy lépése.
-
-    episode: None vagy Episode
-    level:   a modell szintje (ACUTE / ELEVATED / NONE)
-    trend:   a modell trendje (WORSE / SAME / BETTER / NA)
-    now:     monotonikus idő
-
-    Visszaad: (művelet, epizód_vagy_None)
-    """
     if level == ACUTE:
         if episode is None:
             return ACTION_OPEN, Episode(now)
@@ -204,12 +150,10 @@ def step(episode, level: str, trend: str, now: float):
             return ACTION_ESCALATE, episode
         return ACTION_KEEP, episode
 
-
     if episode is not None:
         episode.messages += 1
         episode.last_event_at = now
         if trend == BETTER:
-            episode.closed_at = now
             return ACTION_CLOSE, episode
         return ACTION_KEEP, episode
 
@@ -217,14 +161,12 @@ def step(episode, level: str, trend: str, now: float):
 
 
 def idle_timeout(episode, now: float, idle_min: int) -> bool:
-    """Lejárt-e az epizód, mert a felhasználó elhallgatott?"""
     if episode is None or idle_min <= 0:
         return False
     return (now - episode.last_event_at) >= idle_min * 60
 
 
 def summary(episode, now: float) -> str:
-    """Emberi összefoglaló a záró/riasztó levélhez."""
     if episode is None:
         return "-"
     minutes = max(0, int((now - episode.opened_at) / 60))

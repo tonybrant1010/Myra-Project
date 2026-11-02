@@ -1,3 +1,4 @@
+import { hasMeasuredNorms, type MeasurementNorms } from "@/src/utils/measurement";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -44,7 +45,7 @@ type UserProfileData = {
 type SessionItem = {
   id: string;
   code: string;
-  norms: { a: number; p: number; h: number; c: number };
+  norms: MeasurementNorms;
   answers: number[];
   created_at: string;
 };
@@ -168,7 +169,7 @@ function ChatActivityCard({ activity }: { activity: ChatActivity | null }) {
 
 function AdminTrendChart({ sessions }: { sessions: SessionItem[] }) {
   const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
-  const chartSessions = sessions.slice(0, 8).reverse();
+  const chartSessions = sessions.filter((s) => hasMeasuredNorms(s.norms)).slice(0, 8).reverse();
   const plotWidth = Math.max(chartSize.width - 40, 0);
   const plotHeight = Math.max(chartSize.height - 18, 0);
 
@@ -179,7 +180,7 @@ function AdminTrendChart({ sessions }: { sessions: SessionItem[] }) {
 
   const pointFor = (session: SessionItem, sessionIndex: number, key: "a" | "p" | "h" | "c") => {
     const x = chartSessions.length === 1 ? plotWidth / 2 + 28 : 28 + (sessionIndex / (chartSessions.length - 1)) * plotWidth;
-    const value = Math.max(0, Math.min(1, session.norms?.[key] ?? 0));
+    const value = Math.max(0, Math.min(1, session.norms[key]!));
     const y = (1 - value) * plotHeight + 6;
     return { x, y };
   };
@@ -639,7 +640,7 @@ export default function AdminUsersScreen() {
                             {k.toUpperCase()}
                           </T>
                           <T variant="label" color={theme.textOnDark}>
-                            {((s.norms[k] || 0) * 100).toFixed(0)}%
+                            {hasMeasuredNorms(s.norms) ? `${(s.norms[k]! * 100).toFixed(0)}%` : "—"}
                           </T>
                         </View>
                       ))}

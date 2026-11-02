@@ -6,11 +6,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import {
-  CormorantGaramond_400Regular,
-  CormorantGaramond_500Medium,
-  CormorantGaramond_600SemiBold,
-} from "@expo-google-fonts/cormorant-garamond";
-import {
   Manrope_400Regular,
   Manrope_500Medium,
   Manrope_600SemiBold,
@@ -26,9 +21,6 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    CormorantGaramond_400Regular,
-    CormorantGaramond_500Medium,
-    CormorantGaramond_600SemiBold,
     Manrope_400Regular,
     Manrope_500Medium,
     Manrope_600SemiBold,
@@ -55,7 +47,6 @@ export default function RootLayout() {
           <StatusBar style="light" />
           {Platform.OS === "web" && (
             <style dangerouslySetInnerHTML={{ __html: `
-              /* Custom Brand Scrollbars */
               ::-webkit-scrollbar {
                 width: 8px;
                 height: 8px;
@@ -73,18 +64,15 @@ export default function RootLayout() {
                 background: rgba(79, 209, 197, 0.45);
               }
 
-              /* Brand text selection color */
               ::selection {
                 background: rgba(79, 209, 197, 0.35);
                 color: #f7fafc;
               }
 
-              /* Smooth transition for inputs & active elements */
               input, textarea, [role="button"], button, a {
                 transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
               }
 
-              /* Input Focus Glows */
               input:focus, textarea:focus, [contenteditable="true"]:focus {
                 outline: none !important;
                 outline-width: 0 !important;
@@ -93,7 +81,6 @@ export default function RootLayout() {
                 background-color: rgba(255, 255, 255, 0.08) !important;
               }
 
-              /* Hover scales for interactive elements (buttons, links, active pressables) */
               [role="button"]:hover, button:hover, a:hover, [role="link"]:hover, [style*="cursor: pointer"]:hover, [style*="cursor:pointer"]:hover {
                 transform: translateY(-1.5px) scale(1.015) !important;
                 opacity: 0.95 !important;

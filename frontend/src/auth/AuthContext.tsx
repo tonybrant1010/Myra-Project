@@ -8,7 +8,7 @@ function backendUrl() {
 const TOKEN_KEY = "myra_jwt";
 const DEVICE_TOKEN_KEY = "myra_trusted_device";
 
-export type AppUser = {
+type AppUser = {
   id: number;
   email: string;
   name: string;
@@ -28,6 +28,7 @@ export type AuthResult = {
   ok: boolean;
   error?: string;
   mfaRequired?: boolean;
+  totpRequired?: boolean;
   challengeId?: string;
   isAdmin?: boolean;
   detail?: string;
@@ -37,7 +38,8 @@ export type AuthResult = {
 type Ctx = AuthState & {
   login: (email: string, password: string) => Promise<AuthResult>;
   verifyMfa: (challengeId: string, code: string, rememberDevice: boolean) => Promise<AuthResult>;
-  resendVerification: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  resendVerification: (email: string) => Promise<{ ok: boolean; error?: string; challengeId?: string }>;
+  verifyTotp: (email: string, password: string, code: string) => Promise<AuthResult>;
   register: (email: string, name: string, password: string, acceptedTerms: boolean) => Promise<AuthResult>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -98,15 +100,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         credentials: "omit",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (r.status === 503) {
+      if (r.status === 503 && r.headers.get("X-Maintenance") === "true") {
         notifyMaintenance();
         return "maintenance";
       }
-      if (!r.ok) return null;
+      if (r.status === 401) return null;
+      if (!r.ok) return "maintenance";
       const data = await r.json();
       return data.user as AppUser;
     } catch {
-      return null;
+      return "maintenance";
     }
   }, []);
 
@@ -116,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const data = await r.json();
+    if (data?.totp_required) return { ok: false, totpRequired: true };
     if (data?.mfa_required) {
       return {
         ok: false,
@@ -128,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const token: string = data.access_token;
     const user: AppUser = data.user;
+    if (!token || !user) return { ok: false, error: "Hiányos bejelentkezési válasz." };
     if (data.device_token) await writeDeviceToken(data.device_token);
     await writeToken(token);
     setState({ loading: false, user, token });
@@ -165,7 +170,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    if (r.ok) return { ok: true };
+    if (r.ok) {
+      const data = await r.json();
+      return { ok: true, challengeId: data.verification_challenge_id };
+    }
     return { ok: false, error: await errorText(r) };
   }, []);
 
@@ -180,8 +188,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name,
         password,
         accepted_terms: acceptedTerms,
-        accepted_terms_version: "2026-10-13",
-        accepted_privacy_version: "2026-10-13",
+        accepted_terms_version: "2026-11-02",
+        accepted_privacy_version: "2026-11-02.2",
       }),
     });
 
@@ -206,6 +214,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setState({ loading: false, user, token });
     return { ok: true };
   }, []);
+
+  const verifyTotp = useCallback(async (email: string, password: string, code: string) => {
+    const response = await fetch(apiUrl("/api/auth/totp/login"), {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, code }),
+    });
+    return handleAuthResult(response);
+  }, [handleAuthResult]);
 
   const logout = useCallback(async () => {
     try {
@@ -264,7 +280,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, verifyMfa, resendVerification, register, logout, refreshUser, setUserLocal }}>
+    <AuthContext.Provider value={{ ...state, login, verifyMfa, verifyTotp, resendVerification, register, logout, refreshUser, setUserLocal }}>
       {children}
     </AuthContext.Provider>
   );
@@ -283,7 +299,7 @@ export function apiUrl(path: string) {
 
 const unauthorizedListeners: (() => void)[] = [];
 
-export function registerUnauthorizedListener(cb: () => void) {
+function registerUnauthorizedListener(cb: () => void) {
   unauthorizedListeners.push(cb);
   return () => {
     const idx = unauthorizedListeners.indexOf(cb);
@@ -318,7 +334,7 @@ export async function authedFetch(token: string | null, path: string, init: Requ
   const r = await fetch(apiUrl(path), { ...init, cache: init.cache ?? "no-store", credentials: init.credentials ?? "omit", headers });
   if (r.status === 401) {
     notifyUnauthorized();
-  } else if (r.status === 503) {
+  } else if (r.status === 503 && r.headers.get("X-Maintenance") === "true") {
     notifyMaintenance();
   }
   return r;

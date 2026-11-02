@@ -66,6 +66,7 @@ export default function VerifyEmailScreen() {
     setBusy(true);
     try {
       const r = await resendVerification(email);
+      if (r.challengeId) setCurrentChallenge(r.challengeId);
       if (!r.ok) {
         setError(r.error || "Nem sikerült új kódot kérni.");
         return;

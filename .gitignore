@@ -1,8 +1,6 @@
-# IDE és szerkesztő beállítások
 .idea/
 .vscode/
 
-# Dependencies
 node_modules/
 /.pnp
 .pnp.js
@@ -13,33 +11,25 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 
-# Testing
 /coverage
 .playwright-cli/
 
-# Next.js
 /.next/
 /out/
 next-env.d.ts
 *.tsbuildinfo
 
-# Production builds
 /build
 dist/
 
-# Expo / Metro
 .expo/
 .metro-cache/
 frontend/.expo/
 frontend/.metro-cache/
 
-# Environment files
 .env
 .env.*
 *.env
-# Kivétel: a sablon nem tartalmaz titkot, és kell a verziókövetésbe, hogy az
-# élesben futó (nem titkos) beállítások reprodukálhatók legyenek. A fenti
-# `.env.*` sor enélkül ezt is kizárná.
 !.env.example
 *token.json*
 *credentials.json*
@@ -48,7 +38,6 @@ credentials.json
 *.key
 .credentials
 
-# Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -56,16 +45,13 @@ yarn-error.log*
 .pnpm-debug.log*
 dump.rdb
 
-# System files
 .DS_Store
 
-# Python
 __pycache__/
 *.pyc
 venv/
 .venv/
 
-# Development tools
 chainlit.md
 .chainlit
 .ipynb_checkpoints/
@@ -73,15 +59,12 @@ backend-search.py
 search-details.py
 backend/rag/
 
-# Uzemeltetesi futtatasok (helyi allapotok, nem valo verziokovetesbe)
 ops/*.bak-*
 backend/data/statisztika.json
 backend/data/.statisztikai-allapot.json
 
-# Deployment
 .vercel
 
-# Data and databases
 *.pack
 *.deb
 *.dylib
@@ -97,25 +80,20 @@ backend/data/tts/
 backend/data/tts_cache/
 backend/tts/
 
-# Build caches
 .cache/
 
-# Archive files
 **/*.zip
 **/*.tar.gz
 **/*.tar
 **/*.tgz
 
-# Mobile development
 android-sdk/
 
-# Emergent platform artifacts
 .emergent/
 test_result.md
 test_reports/
 memory/
 
-# Helyi adatok, titkok, munkafajlok — soha ne kerüljenek a repóba
 _private/
 *.csv
 *.xlsx
@@ -124,7 +102,6 @@ _chrome_prof/
 _lo_profile/
 _pdf_out/
 
-# Nem a futtatható váz részei — külön, nem publikus tárban vannak
 /docs/
 /publication/
 /backend/data/
@@ -134,19 +111,36 @@ _pdf_out/
 /_*.py
 /_*.ps1
 
-# Build-maradványok
 /.build-tmp/
 /.pip-tmp/
 
-# Telepítők és tudásbázis — nem a váz részei
 *.exe
 /backend/default_kb.pdf
 
-# Leallitas-jelzo (futasideju allapot, nem verziokovetett)
 /control/
 /backups/
+/pytest-of-*/
+/release-candidate/
 
-# QA-eszkoz futasideju adatai: riportok, sessionok, lokalis .env (API-kulcs!)
+# Helyi ellenőrzési gyorsítótárak és futásidejű modellfájlok
+.pytest_cache/
+.ruff_cache/
+*.gguf
+*.gguf.*
+
+# A nyilvános csontváznak nem részei: éles állapot és egyszeri átadási fájlok
+/ops/integritas.json
+/ops/karanten-szunet
+/ops/mentes-fut
+/ops/AUDIT-*.md
+/ops/REPAIR-STATUS.md
+/ops/SERVER-HANDOFF.md
+/ops/install_audit_release.py
+/ops/remove_gpt_oss.py
+/ops/tests/test_install_audit_release.py
+/ops/tests/test_remove_gpt_oss.py
+
 tools/**/data/
 tools/**/.env
 tools/**/tests/_result.txt
+_to_delete/

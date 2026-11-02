@@ -1,5 +1,6 @@
+import { useGameBoardSize } from "@/src/utils/useGameBoardSize";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, TouchableOpacity, Dimensions } from "react-native";
+import { StyleSheet, View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,10 +12,7 @@ import { T } from "@/src/components/Typography";
 import { shadow, theme, radii, spacing } from "@/src/theme";
 
 const GRID_SIZE = 12;
-const { width } = Dimensions.get("window");
 const BOARD_PADDING = 12;
-const BOARD_SIZE = width - 32;
-const CELL_SIZE = Math.floor((BOARD_SIZE - BOARD_PADDING * 2) / GRID_SIZE);
 
 
 const PALETTE = [
@@ -81,6 +79,8 @@ const TEMPLATES: Record<TemplateName, boolean[][]> = {
 };
 
 export default function RelaxColoringScreen() {
+  const boardSize = useGameBoardSize(380);
+  const cellSize = Math.floor((boardSize - BOARD_PADDING * 2) / GRID_SIZE);
 
 
   const [activeTemplate, setActiveTemplate] = useState<TemplateName>("HEART");
@@ -114,7 +114,7 @@ export default function RelaxColoringScreen() {
     <SafeAreaView style={styles.safe} testID="relax-coloring-screen">
       <ContentBackground>
         <TopBar title="Pixel Színező" showBack={true} backPath="/relax" />
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
 
           <View style={styles.templatePanel}>
             {(["HEART", "FLOWER", "SUN", "FREE"] as TemplateName[]).map((name) => {
@@ -147,7 +147,7 @@ export default function RelaxColoringScreen() {
 
           <LinearGradient
             colors={["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.02)"]}
-            style={[styles.boardWrap, shadow.card]}
+            style={[styles.boardWrap, shadow.card, { width: boardSize, height: boardSize }]}
           >
             {grid.map((row, rIdx) => (
               <View key={`row-${rIdx}`} style={styles.boardRow}>
@@ -160,6 +160,7 @@ export default function RelaxColoringScreen() {
                       key={`cell-${rIdx}-${cIdx}`}
                       style={[
                         styles.cell,
+                          { width: cellSize, height: cellSize },
                         hasColor && { backgroundColor: color, borderColor: "rgba(255,255,255,0.15)" },
                       ]}
                       onPress={() => handleCellPress(rIdx, cIdx)}
@@ -221,7 +222,7 @@ export default function RelaxColoringScreen() {
               <T variant="label" color={theme.textOnDark} style={{ marginLeft: 6 }}>Törlés</T>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </ContentBackground>
     </SafeAreaView>
   );
@@ -233,7 +234,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.bg,
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: spacing.md,
     alignItems: "center",
   },
@@ -259,8 +260,7 @@ const styles = StyleSheet.create({
     ...shadow.glow,
   },
   boardWrap: {
-    width: BOARD_SIZE,
-    height: BOARD_SIZE,
+    flexShrink: 0,
     padding: BOARD_PADDING,
     borderRadius: radii.lg,
     backgroundColor: "rgba(255,255,255,0.03)",
@@ -273,8 +273,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   cell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
     justifyContent: "center",
     alignItems: "center",
     borderColor: "rgba(255,255,255,0.04)",

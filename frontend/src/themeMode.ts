@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 
 export type ThemeMode = "day" | "night";
 
-export const THEME_STORAGE_KEY = "myra.theme.mode";
+const THEME_STORAGE_KEY = "myra.theme.mode";
 
 const isWeb = Platform.OS === "web";
 
@@ -16,7 +16,7 @@ export function getThemeMode(): ThemeMode {
   }
 }
 
-export function setThemeMode(mode: ThemeMode): void {
+function setThemeMode(mode: ThemeMode): void {
   if (!isWeb) return;
   try {
     const root = document.documentElement;

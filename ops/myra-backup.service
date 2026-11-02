@@ -1,0 +1,17 @@
+[Unit]
+Description=Myra adatbazis- es konfiguracios mentes
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=<user>
+Group=<user>
+Environment=MYRA_DIR=/srv/backend/myra
+Environment=MYRA_BACKUP_DIR=/srv/myra-backups
+Environment=MYRA_FRONTEND_DIR=/srv/frontend/dist
+EnvironmentFile=-/etc/myra/ops.env
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=30min
+ExecStart=/srv/backend/myra/ops/myra-backup.sh

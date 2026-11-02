@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, TouchableOpacity, Dimensions, Vibration } from "react-native";
+import { useGameBoardSize } from "@/src/utils/useGameBoardSize";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { StyleSheet, View, TouchableOpacity, ScrollView, Vibration } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { authedFetch, useAuth } from "@/src/auth/AuthContext";
-import { startLeaderboardSession } from "@/src/utils/crypto";
+import { startLeaderboardSession, seededRandom } from "@/src/utils/crypto";
 
 import ContentBackground from "@/src/components/ContentBackground";
 import TopBar from "@/src/components/TopBar";
@@ -15,50 +16,10 @@ import { shadow, theme, radii, spacing } from "@/src/theme";
 
 const GRID_SIZE = 6;
 const EMOJIS = ["🌸", "💎", "🍀", "☀️", "💧", "⭐"];
-const { width } = Dimensions.get("window");
-const TILE_SIZE = Math.floor((width - 48) / GRID_SIZE);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function RelaxMatchScreen() {
-  const { token } = useAuth();
-  const sessionTokenRef = useRef<string | null>(null);
 
-
-  const [board, setBoard] = useState<string[][]>([]);
-  const [selected, setSelected] = useState<{ r: number; c: number } | null>(null);
-  const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const [moves, setMoves] = useState(30);
-  const [gameOver, setGameOver] = useState(false);
-  const [animating, setAnimating] = useState(false);
-  const [combo, setCombo] = useState(1);
-  const [showShuffleBanner, setShowShuffleBanner] = useState(false);
-
-
-  useEffect(() => {
-    const loadHighScore = async () => {
-      try {
-        const val = await AsyncStorage.getItem("myra_match_highscore");
-        if (val !== null) {
-          setHighScore(parseInt(val, 10));
-        }
-      } catch {}
-    };
-    loadHighScore();
-    startNewGame();
-  }, []);
-
-
-  useEffect(() => {
-    if (score > highScore) {
-      setHighScore(score);
-      AsyncStorage.setItem("myra_match_highscore", score.toString()).catch(() => {});
-    }
-  }, [score, highScore]);
-
-
-  const getRandomEmoji = () => EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
 
 
   const findMatches = (currentBoard: string[][]): Set<string> => {
@@ -146,7 +107,7 @@ export default function RelaxMatchScreen() {
   };
 
 
-  const shuffleBoardUntilValid = (currentBoard: string[][]): string[][] => {
+  const shuffleBoardUntilValid = (currentBoard: string[][], random: () => number): string[][] => {
     let copy = currentBoard.map((row) => [...row]);
     let attempts = 0;
     const flat = copy.flat();
@@ -154,7 +115,7 @@ export default function RelaxMatchScreen() {
     while (attempts < 150) {
 
       for (let i = flat.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(random() * (i + 1));
         const temp = flat[i];
         flat[i] = flat[j];
         flat[j] = temp;
@@ -175,7 +136,73 @@ export default function RelaxMatchScreen() {
   };
 
 
-  const startNewGame = () => {
+  const performSwap = (
+    currentBoard: string[][],
+    r1: number,
+    c1: number,
+    r2: number,
+    c2: number
+  ) => {
+    const copy = currentBoard.map((row) => [...row]);
+    const temp = copy[r1][c1];
+    copy[r1][c1] = copy[r2][c2];
+    copy[r2][c2] = temp;
+    return copy;
+  };
+
+
+
+export default function RelaxMatchScreen() {
+  const boardSize = useGameBoardSize(300);
+  const tileSize = Math.floor((boardSize - 16) / GRID_SIZE);
+  const { token } = useAuth();
+  const sessionTokenRef = useRef<string | null>(null);
+  const randomRef = useRef(Math.random);
+  const proofRef = useRef<number[][]>([]);
+  const generationRef = useRef(0);
+  const getRandomEmoji = useCallback(() => EMOJIS[Math.floor(randomRef.current() * EMOJIS.length)], []);
+
+
+  const [board, setBoard] = useState<string[][]>([]);
+  const [selected, setSelected] = useState<{ r: number; c: number } | null>(null);
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+  const [moves, setMoves] = useState(30);
+  const [gameOver, setGameOver] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [combo, setCombo] = useState(1);
+  const [showShuffleBanner, setShowShuffleBanner] = useState(false);
+
+
+  useEffect(() => {
+    const loadHighScore = async () => {
+      try {
+        const val = await AsyncStorage.getItem("myra_match_highscore");
+        if (val !== null) {
+          setHighScore(parseInt(val, 10));
+        }
+      } catch {}
+    };
+    loadHighScore();
+  }, []);
+
+
+  useEffect(() => {
+    if (score > highScore) {
+      setHighScore(score);
+      AsyncStorage.setItem("myra_match_highscore", score.toString()).catch(() => {});
+    }
+  }, [score, highScore]);
+
+
+  const startNewGame = useCallback(async () => {
+    const generation = ++generationRef.current;
+    setAnimating(true);
+    const session = await startLeaderboardSession(token, "match");
+    if (generation !== generationRef.current) return;
+    randomRef.current = session ? seededRandom(session.challenge.seed) : Math.random;
+    proofRef.current = [];
+    sessionTokenRef.current = session?.session_token ?? null;
     let newBoard: string[][] = [];
     let attempts = 0;
 
@@ -221,13 +248,9 @@ export default function RelaxMatchScreen() {
     setAnimating(false);
     setCombo(1);
     setShowShuffleBanner(false);
-    sessionTokenRef.current = null;
-    if (token) {
-      startLeaderboardSession(token, "match").then((sessionToken) => {
-        sessionTokenRef.current = sessionToken;
-      });
-    }
-  };
+  }, [token, getRandomEmoji]);
+
+  useEffect(() => { startNewGame(); }, [startNewGame]);
 
 
   const animateCascade = async (currentBoard: string[][], initialCombo = 1) => {
@@ -309,7 +332,7 @@ export default function RelaxMatchScreen() {
 
 
     if (!hasValidMoves(boardCopy) && moves > 0) {
-      const shuffled = shuffleBoardUntilValid(boardCopy);
+      const shuffled = shuffleBoardUntilValid(boardCopy, randomRef.current);
       boardCopy = shuffled;
       setBoard(shuffled);
       setShowShuffleBanner(true);
@@ -334,6 +357,7 @@ export default function RelaxMatchScreen() {
             body: JSON.stringify({
               game_type: "match",
               score: currentScore,
+              game_proof: { moves: proofRef.current },
               session_token: sessionTokenRef.current,
             }),
           }).catch(() => {});
@@ -345,21 +369,6 @@ export default function RelaxMatchScreen() {
       }
       return currentMoves;
     });
-  };
-
-
-  const performSwap = (
-    currentBoard: string[][],
-    r1: number,
-    c1: number,
-    r2: number,
-    c2: number
-  ) => {
-    const copy = currentBoard.map((row) => [...row]);
-    const temp = copy[r1][c1];
-    copy[r1][c1] = copy[r2][c2];
-    copy[r2][c2] = temp;
-    return copy;
   };
 
 
@@ -388,6 +397,7 @@ export default function RelaxMatchScreen() {
 
       if (matches.size > 0) {
 
+        proofRef.current.push([prev.r, prev.c, r, c]);
         setMoves((prevMoves) => prevMoves - 1);
         await animateCascade(swappedBoard, 1);
       } else {
@@ -416,7 +426,7 @@ export default function RelaxMatchScreen() {
     <SafeAreaView style={styles.safe} testID="relax-match-screen">
       <ContentBackground>
         <TopBar title="Myra Match" showBack={true} backPath="/relax" />
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
 
           <View style={styles.statsPanel}>
             <LinearGradient
@@ -468,7 +478,7 @@ export default function RelaxMatchScreen() {
 
           <LinearGradient
             colors={["rgba(255, 255, 255, 0.06)", "rgba(255, 255, 255, 0.02)"]}
-            style={[styles.boardWrap, shadow.card]}
+            style={[styles.boardWrap, shadow.card, { width: boardSize, height: boardSize }]}
           >
             {board.map((row, rIdx) => (
               <View key={`row-${rIdx}`} style={styles.boardRow}>
@@ -479,6 +489,7 @@ export default function RelaxMatchScreen() {
                       key={`tile-${rIdx}-${cIdx}`}
                       style={[
                         styles.tile,
+                        { width: tileSize - 4, height: tileSize - 4 },
                         isSelected && styles.tileSelected,
                         emoji === "✨" && styles.tileMatched,
                         emoji === "" && styles.tileEmpty,
@@ -549,7 +560,7 @@ export default function RelaxMatchScreen() {
               <T variant="label" color={theme.textOnDark} style={{ marginLeft: 6 }}>Újrakezdés</T>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </ContentBackground>
     </SafeAreaView>
   );
@@ -561,7 +572,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.bg,
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: spacing.md,
     alignItems: "center",
   },
@@ -598,8 +609,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
   },
   boardWrap: {
-    width: width - 32,
-    height: width - 32,
+    flexShrink: 0,
     padding: 8,
     borderRadius: radii.lg,
     backgroundColor: "rgba(255,255,255,0.03)",
@@ -616,8 +626,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   tile: {
-    width: TILE_SIZE - 4,
-    height: TILE_SIZE - 4,
     margin: 2,
     justifyContent: "center",
     alignItems: "center",

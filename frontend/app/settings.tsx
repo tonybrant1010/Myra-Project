@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { showAlert } from "@/src/utils/dialog";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -62,6 +62,32 @@ export default function SettingsScreen() {
   const [docModal, setDocModal] = useState<DocModal>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [exportPassword, setExportPassword] = useState("");
+  const [exportText, setExportText] = useState<string | null>(null);
+
+  const exportData = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await authedFetch(token, "/api/user/data-export", {
+        method: "POST", body: JSON.stringify({ current_password: exportPassword }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.detail || "Az export sikertelen.");
+      const text = JSON.stringify(data, null, 2);
+      if (Platform.OS === "web") {
+        const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "myra-szemelyes-adatok.json";
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } else setExportText(text);
+      setExportPassword("");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Az export sikertelen.");
+    } finally { setBusy(false); }
+  };
 
   useEffect(() => {
     setMemoryEnabled(!!user?.profile_memory_enabled);
@@ -93,7 +119,7 @@ export default function SettingsScreen() {
     }
   };
 
-  const loadSecurity = async () => {
+  const loadSecurity = useCallback(async () => {
     try {
       const r = await authedFetch(token, "/api/auth/security");
       const d = await r.json().catch(() => ({}));
@@ -103,11 +129,11 @@ export default function SettingsScreen() {
         setTrustedDevices(Array.isArray(d.trusted_devices) ? d.trusted_devices : []);
       }
     } catch {}
-  };
+  }, [token]);
 
   useEffect(() => {
     if (token) loadSecurity();
-  }, [token]);
+  }, [token, loadSecurity]);
 
   const requestAdminCode = async () => {
     setMessage(null);
@@ -163,7 +189,7 @@ export default function SettingsScreen() {
       });
       const d = await r.json().catch(() => ({}));
       if (r.ok) {
-        Alert.alert("Jelszó módosítva", "Biztonsági okból újra be kell jelentkezned.");
+        showAlert("Jelszó módosítva", "Biztonsági okból újra be kell jelentkezned.");
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -346,6 +372,11 @@ export default function SettingsScreen() {
               <DocLink title="Adatkezelési tájékoztató" icon="shield-checkmark-outline" onPress={() => setDocModal({ title: "Adatkezelési tájékoztató", text: gdprText })} />
               <DocLink title="Felhasználási feltételek" icon="reader-outline" onPress={() => setDocModal({ title: "Felhasználási feltételek", text: termsText })} />
               <DocLink title="Myra Kisokos" icon="information-circle-outline" onPress={() => setDocModal({ title: "Myra Kisokos", text: kisokosText })} />
+              <PasswordInput value={exportPassword} onChangeText={setExportPassword} placeholder="Jelszó az adatok letöltéséhez" />
+              <TouchableOpacity onPress={exportData} disabled={busy || !exportPassword}>
+                <T variant="label" color={theme.accentSoft}>Adatok letöltése</T>
+              </TouchableOpacity>
+              {exportText && <TextInput multiline value={exportText} editable={false} selectTextOnFocus />}
             </View>
 
             <View style={[styles.sectionCard, shadow.card]}>

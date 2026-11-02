@@ -1,18 +1,3 @@
-"""A krízis-epizód állapotgép tesztjei (2026-10-18).
-
-Függőség nélkül fut, mert a vizsgált logika a `crisis` modulban van:
-
-    cd backend && python tests/test_crisis_detection.py
-
-A regressziós esetek a 2026-10-17-i éles beszélgetésekből származnak:
-- TROLL_UZENETEK: kamu vészhelyzet-sztori. A modell krízisprotokollt adott rá,
-  de a régi fordulatlista (padló) egyetlen üzenetre sem szólt -> nem ment levél.
-- IDEZET: regényből idézett mondat, amire a régi lista tévesen riasztott.
-
-Az epizód-tesztek a 2026-10-18-i kérést fedik le: kezdet -> (súlyosbodás) ->
-enyhülés, azaz legfeljebb három levél egy krízishez, nem húsz.
-"""
-
 import os
 import sys
 import unittest
@@ -103,14 +88,13 @@ class TestEpizod(unittest.TestCase):
         _a, ep = crisis.step(None, crisis.ACUTE, crisis.NA, now=1000.0)
         action, ep = crisis.step(ep, crisis.NONE, crisis.BETTER, now=2000.0)
         self.assertEqual(action, crisis.ACTION_CLOSE)
-        self.assertEqual(ep.closed_at, 2000.0)
+        self.assertEqual(ep.last_event_at, 2000.0)
 
     def test_idezet_nem_zarja_le_az_epizodot(self):
 
         _a, ep = crisis.step(None, crisis.ACUTE, crisis.NA, now=1000.0)
         action, ep = crisis.step(ep, crisis.NONE, crisis.NA, now=1100.0)
         self.assertEqual(action, crisis.ACTION_KEEP)
-        self.assertIsNone(ep.closed_at)
 
     def test_epizod_nelkul_nem_acute_csend(self):
         action, ep = crisis.step(None, crisis.NONE, crisis.NA, now=1000.0)
@@ -133,7 +117,6 @@ class TestEpizod(unittest.TestCase):
         self.assertIn("súlyosbodás: 1", szoveg)
 
     def test_teljes_epizod_kezdet_sulyosbodas_enyhules(self):
-        """A kért viselkedés: kezdet -> súlyosbodás -> enyhült (három levél)."""
         muveletek = []
 
         action, ep = crisis.step(None, crisis.ACUTE, crisis.NA, now=0.0)

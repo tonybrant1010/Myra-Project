@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -43,7 +43,7 @@ export default function SideMenu({ visible, onClose, forumUnread }: Props) {
     setThemeModeState(getThemeMode());
   }, []);
 
-  const loadSessions = () => {
+  const loadSessions = useCallback(() => {
     if (!token) return;
     setSessionsLoading(true);
     authedFetch(token, "/api/quiz/sessions")
@@ -51,18 +51,18 @@ export default function SideMenu({ visible, onClose, forumUnread }: Props) {
       .then((d) => setSessions(d.sessions || []))
       .catch(() => setSessions([]))
       .finally(() => setSessionsLoading(false));
-  };
+  }, [token]);
 
   useEffect(() => {
     if (visible) loadSessions();
-  }, [visible, token]);
+  }, [visible, loadSessions]);
 
   const handleRetake = async () => {
     setBusy(true);
     try {
       const r = await authedFetch(token, "/api/codes/reset", { method: "POST" });
       if (r.ok) {
-        setUserLocal((u) => (u ? { ...u, state_code: null } : u));
+        setUserLocal((u) => (u ? { ...u, state_code: null, is_code_expired: false, code_days_remaining: 0 } : u));
         setConfirmRetake(false);
         onClose();
         setTimeout(() => router.replace("/quiz"), 50);

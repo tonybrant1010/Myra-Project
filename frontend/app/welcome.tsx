@@ -1,3 +1,4 @@
+import { hasMeasuredNorms, type MeasurementNorms } from "@/src/utils/measurement";
 import React, { useState, useEffect, useCallback } from "react";
 import { Platform, ScrollView, StyleSheet, View, type LayoutChangeEvent, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,7 +15,7 @@ import { shadow, theme } from "@/src/theme";
 type SessionItem = {
   id: string;
   code: string;
-  norms: { a: number; p: number; h: number; c: number };
+  norms: MeasurementNorms;
   created_at: string;
 };
 
@@ -41,7 +42,8 @@ function shortDate(value: string): string {
 
 function UserTrendChart({ sessions, onNewQuiz }: { sessions: SessionItem[]; onNewQuiz: () => void }) {
   const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
-  const chartSessions = sessions.slice(0, 8).reverse();
+  const measuredSessions = sessions.filter((s) => hasMeasuredNorms(s.norms));
+  const chartSessions = measuredSessions.slice(0, 8).reverse();
   const plotWidth = Math.max(chartSize.width - 40, 0);
   const plotHeight = Math.max(chartSize.height - 35, 0);
 
@@ -52,12 +54,12 @@ function UserTrendChart({ sessions, onNewQuiz }: { sessions: SessionItem[]; onNe
 
   const pointFor = (session: SessionItem, sessionIndex: number, key: "a" | "p" | "h" | "c") => {
     const x = chartSessions.length === 1 ? plotWidth / 2 + 28 : 28 + (sessionIndex / (chartSessions.length - 1)) * plotWidth;
-    const value = Math.max(0, Math.min(1, session.norms?.[key] ?? 0));
+    const value = Math.max(0, Math.min(1, session.norms[key]!));
     const y = (1 - value) * plotHeight + 8;
     return { x, y };
   };
 
-  if (sessions.length === 0) {
+  if (measuredSessions.length === 0) {
     return (
       <View style={[styles.emptyChartCard, shadow.card]}>
         <View style={styles.emptyChartIcon}>
@@ -85,7 +87,7 @@ function UserTrendChart({ sessions, onNewQuiz }: { sessions: SessionItem[]; onNe
           </View>
           <T variant="caption" color={theme.accent} style={{ fontWeight: "700" }}>SAJÁT ÁLLAPOT TREND</T>
         </View>
-        <T variant="small" color="rgba(247,251,255,0.66)">{sessions.length} mérés összesen</T>
+        <T variant="small" color="rgba(247,251,255,0.66)">{measuredSessions.length} mérés összesen</T>
       </View>
       <View style={styles.chartArea} onLayout={onChartLayout}>
         <View style={[styles.gridLine, { top: "0%" }]} />
