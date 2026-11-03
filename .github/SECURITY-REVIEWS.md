@@ -37,6 +37,10 @@ vagy egyedi fork bevezetése nem indokolt e visszavont CVE miatt.
 
 Az admin PDF-kezelés közös fájlnév-ellenőrzést, feloldott útvonalon végzett
 könyvtárhatár-ellenőrzést és symlink-elutasítást kapott. A feltöltés új ideiglenes
-fájlt publikál atomi cserével. A regressziós tesztek a könyvtárból kilépő neveket,
+fájlt publikál atomi cserével. Törléskor a kérés neve csak a megbízható könyvtárban
+létező bejegyzés kiválasztására szolgál; az útvonal ebből a bejegyzésből készül.
+A normalizált, könyvtárelválasztóval lezárt prefix ellenőrzése minden,
+fájlnévből képzett útvonalon végzett metaadat-lekérdezést megelőz.
+A regressziós tesztek a könyvtárból kilépő neveket,
 symlinkeket, hibás publikálást és a támogatott Unicode fájlneveket is ellenőrzik.
 Ehhez a találathoz nincs scannerelnyomás; az új elemzésnek a javítást kell igazolnia.

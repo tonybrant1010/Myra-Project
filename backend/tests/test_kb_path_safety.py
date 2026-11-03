@@ -147,6 +147,35 @@ async def test_valid_pdf_delete_keeps_outside_file_and_updates_index(kb_root, tm
 
 
 @pytest.mark.anyio
+async def test_missing_delete_selects_no_file_and_does_not_change_database(kb_root, tmp_path, monkeypatch):
+    outside = tmp_path / "missing.pdf"
+    outside.write_bytes(b"private outside data")
+    db = SimpleNamespace(execute=AsyncMock())
+    audit = AsyncMock()
+    monkeypatch.setattr(server, "_admin_audit", audit)
+
+    def reject_unselected_path(_name):
+        pytest.fail("A missing request filename reached filesystem path construction")
+
+    monkeypatch.setattr(server, "_kb_pdf_path", reject_unselected_path)
+    with pytest.raises(HTTPException) as error:
+        await server.admin_delete_kb_file(outside.name, Request({"type": "http"}),
+                                          SimpleNamespace(id=1), db)
+    assert error.value.status_code == 404
+    db.execute.assert_not_awaited()
+    audit.assert_not_awaited()
+    assert outside.read_bytes() == b"private outside data"
+
+
+def test_existing_pdf_lookup_requires_an_entry_in_the_trusted_directory(kb_root):
+    with pytest.raises(HTTPException) as error:
+        server._existing_kb_pdf_path("new.pdf")
+    assert error.value.status_code == 404
+    server._write_kb_pdf("new.pdf", b"%PDF-1.7\nnew")
+    assert server._existing_kb_pdf_path("new.pdf") == (kb_root / "data/kb_pdfs/new.pdf").resolve()
+
+
+@pytest.mark.anyio
 async def test_pdf_list_does_not_follow_links_and_includes_uppercase_extension(kb_root, tmp_path):
     pdf_dir = kb_root / "data/kb_pdfs"
     (pdf_dir / "Árvíztűrő.PDF").write_bytes(b"%PDF-1.7\nknowledge")

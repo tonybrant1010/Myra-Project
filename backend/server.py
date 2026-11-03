@@ -947,15 +947,38 @@ def _kb_pdf_directory(*, create: bool = False) -> Path:
 def _kb_pdf_path(filename: str) -> Path:
     name = _safe_upload_filename(filename, (".pdf",))
     pdf_dir = _kb_pdf_directory()
-    candidate = pdf_dir / name
+    # Normalize and check the directory prefix before any filesystem probing.
+    # Keep the separator: sibling paths such as "kb_pdfs-old" are not inside it.
+    prefix = os.fspath(pdf_dir) + os.sep
+    normalized = os.path.abspath(os.path.join(os.fspath(pdf_dir), name))
+    if not normalized.startswith(prefix):
+        raise HTTPException(status_code=400, detail="Érvénytelen fájlnév.")
+    candidate = Path(normalized)
     if candidate.is_symlink():
         raise HTTPException(status_code=400, detail="Szimbolikus hivatkozás nem kezelhető PDF-ként.")
-    pdf_path = candidate.resolve()
-    if not pdf_path.is_relative_to(pdf_dir) or pdf_path.parent != pdf_dir:
+    resolved = os.path.realpath(normalized)
+    if not resolved.startswith(prefix):
+        raise HTTPException(status_code=400, detail="Érvénytelen fájlnév.")
+    pdf_path = Path(resolved)
+    if pdf_path.parent != pdf_dir:
         raise HTTPException(status_code=400, detail="Érvénytelen fájlnév.")
     if pdf_path.exists() and not pdf_path.is_file():
         raise HTTPException(status_code=400, detail="Csak szabályos PDF-fájl kezelhető.")
     return pdf_path
+
+
+def _existing_kb_pdf_path(filename: str) -> Path:
+    name = _safe_upload_filename(filename, (".pdf",))
+    pdf_dir = _kb_pdf_directory()
+    try:
+        # The request selects an existing, trusted-directory entry by equality.
+        # It is never used to construct the path passed to filesystem operations.
+        entry = next((item for item in pdf_dir.iterdir() if item.name == name), None)
+    except FileNotFoundError:
+        entry = None
+    if entry is None:
+        raise HTTPException(status_code=404, detail="A fájl nem található.")
+    return _kb_pdf_path(entry.name)
 
 
 def _write_kb_pdf(filename: str, content: bytes) -> None:
@@ -6507,7 +6530,7 @@ async def admin_list_kb_files(admin: User = Depends(require_admin)):
 @api.delete("/admin/kb/files/{filename}")
 async def admin_delete_kb_file(filename: str, request: Request, admin: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
     filename = _safe_upload_filename(filename, (".pdf",))
-    pdf_path = _kb_pdf_path(filename)
+    pdf_path = _existing_kb_pdf_path(filename)
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="A fájl nem található.")
     try:
