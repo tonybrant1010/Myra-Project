@@ -20,7 +20,7 @@
     "test:release": "node --test scripts/build-release.test.js"
   },
   "dependencies": {
-    "@babel/runtime": "^7.20.6",
+    "@babel/runtime": "^8.0.10",
     "@expo-google-fonts/cormorant-garamond": "^0.4.1",
     "@expo-google-fonts/manrope": "^0.4.2",
     "@expo/metro-runtime": "^6.1.2",
