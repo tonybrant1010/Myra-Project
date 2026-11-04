@@ -24,7 +24,7 @@ email-validator==2.3.0
 
 
 pypdf==6.21.4
-fpdf2==2.8.8
+fpdf2==2.9.0
 Pillow==13.0.0
 
 
